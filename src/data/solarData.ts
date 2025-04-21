@@ -1,4 +1,3 @@
-
 export interface SolarPanel {
   id: string;
   name: string;
@@ -52,41 +51,18 @@ export const solarPanels: SolarPanel[] = [
 ];
 
 export const inverters: Inverter[] = [
-  {
-    id: "solis-100",
-    name: "Solis 100",
-    power: 100,
-    efficiency: 99,
-    mpptCount: 20
-  },
-  {
-    id: "huawei-60",
-    name: "Huawei 60",
-    power: 60,
-    efficiency: 98,
-    mpptCount: 12
-  },
-  {
-    id: "sungrow-50",
-    name: "Sungrow 50",
-    power: 50,
-    efficiency: 97,
-    mpptCount: 10
-  },
-  {
-    id: "sma-25",
-    name: "SMA 25",
-    power: 25,
-    efficiency: 96,
-    mpptCount: 5
-  },
-  {
-    id: "growatt-40",
-    name: "Growatt 40",
-    power: 40,
-    efficiency: 97,
-    mpptCount: 8
-  }
+  { id: "solis-3", name: "Solis 3kW", power: 3, efficiency: 98, mpptCount: 2 },
+  { id: "solis-5", name: "Solis 5kW", power: 5, efficiency: 98, mpptCount: 2 },
+  { id: "solis-10", name: "Solis 10kW", power: 10, efficiency: 98, mpptCount: 3 },
+  { id: "solis-15", name: "Solis 15kW", power: 15, efficiency: 98, mpptCount: 3 },
+  { id: "solis-20", name: "Solis 20kW", power: 20, efficiency: 98, mpptCount: 4 },
+  { id: "solis-30", name: "Solis 30kW", power: 30, efficiency: 98, mpptCount: 4 },
+  { id: "solis-40", name: "Solis 40kW", power: 40, efficiency: 98, mpptCount: 4 },
+  { id: "solis-50", name: "Solis 50kW", power: 50, efficiency: 98, mpptCount: 5 },
+  { id: "solis-60", name: "Solis 60kW", power: 60, efficiency: 98, mpptCount: 6 },
+  { id: "solis-80", name: "Solis 80kW", power: 80, efficiency: 98, mpptCount: 8 },
+  { id: "solis-100", name: "Solis 100kW", power: 100, efficiency: 98, mpptCount: 10 },
+  { id: "solis-125", name: "Solis 125kW", power: 125, efficiency: 98, mpptCount: 10 }
 ];
 
 export interface CableSize {
@@ -343,4 +319,3 @@ export const cableSizes: CableSize[] = [
 export const standardMCCBRatings = [
   10, 16, 20, 25, 32, 40, 50, 63, 80, 100, 125, 160, 200, 250, 320, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3200, 4000, 5000, 6300
 ];
-

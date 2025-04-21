@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { SolarPanel, solarPanels } from "@/data/solarData";
 import { 
@@ -17,7 +16,6 @@ interface PanelSelectionProps {
   onTotalPanelsChange: (total: number) => void;
   onStringsChange: (strings: number) => void;
   onPanelsPerStringChange: (panels: number) => void;
-  // Add the props that are being passed from SolarCalculator.tsx
   selectedPanel?: SolarPanel | null;
   totalPanels?: number;
   strings?: number;
@@ -29,7 +27,6 @@ const PanelSelection = ({
   onTotalPanelsChange,
   onStringsChange,
   onPanelsPerStringChange,
-  // Use the passed props with default values
   selectedPanel: initialSelectedPanel = null,
   totalPanels: initialTotalPanels = 0,
   strings: initialStrings = 0,
@@ -39,8 +36,6 @@ const PanelSelection = ({
   const [totalPanels, setTotalPanels] = useState<number>(initialTotalPanels);
   const [strings, setStrings] = useState<number>(initialStrings);
   const [panelsPerString, setPanelsPerString] = useState<number>(initialPanelsPerString);
-
-  // New: fake panel data state for runtime added panels
   const [panels, setPanels] = useState<SolarPanel[]>(solarPanels);
   const [showPanelForm, setShowPanelForm] = useState(false);
   const [newPanel, setNewPanel] = useState<{ name: string; width: number; length: number; efficiency: number; power: number }>({
@@ -51,19 +46,16 @@ const PanelSelection = ({
     power: 0,
   });
 
-  // Update selectedPanelId when initialSelectedPanel changes
   useEffect(() => {
     if (initialSelectedPanel?.id) {
       setSelectedPanelId(initialSelectedPanel.id);
     }
   }, [initialSelectedPanel]);
 
-  // Update totalPanels when initialTotalPanels changes
   useEffect(() => {
     setTotalPanels(initialTotalPanels);
   }, [initialTotalPanels]);
 
-  // Update strings when initialStrings changes
   useEffect(() => {
     setStrings(initialStrings);
   }, [initialStrings]);
@@ -74,7 +66,6 @@ const PanelSelection = ({
   }, [selectedPanelId, onPanelChange, panels]);
 
   useEffect(() => {
-    // Update panels per string based on total panels and strings
     if (strings > 0) {
       const calculatedPanelsPerString = Math.floor(totalPanels / strings);
       setPanelsPerString(calculatedPanelsPerString);
@@ -92,7 +83,6 @@ const PanelSelection = ({
     onStringsChange(value);
   };
 
-  // New: handle add custom panel
   const handleAddPanel = () => {
     if (
       !newPanel.name ||
@@ -112,6 +102,13 @@ const PanelSelection = ({
       efficiency: 1,
       power: 0,
     });
+  };
+
+  const handleRemovePanel = (panelId: string) => {
+    setPanels(prev => prev.filter(p => p.id !== panelId));
+    if (selectedPanelId === panelId) {
+      setSelectedPanelId("");
+    }
   };
 
   return (
@@ -134,9 +131,25 @@ const PanelSelection = ({
               </SelectTrigger>
               <SelectContent>
                 {panels.map((panel) => (
-                  <SelectItem key={panel.id} value={panel.id}>
-                    {panel.name} ({panel.power}W)
-                  </SelectItem>
+                  <div key={panel.id} className="flex items-center w-full">
+                    <SelectItem value={panel.id} className="flex-1">
+                      {panel.name} ({panel.power}W)
+                    </SelectItem>
+                    {panel.id.match(/-\d{13,}$/) && (
+                      <button
+                        type="button"
+                        className="ml-1 text-red-500 hover:text-red-700 text-xs font-bold"
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleRemovePanel(panel.id);
+                        }}
+                        tabIndex={-1}
+                        aria-label="Xóa tấm pin"
+                      >
+                        Xoá
+                      </button>
+                    )}
+                  </div>
                 ))}
               </SelectContent>
             </Select>
@@ -171,18 +184,10 @@ const PanelSelection = ({
                 />
                 <Input
                   type="number"
-                  min="0"
-                  step="0.01"
-                  max="1"
-                  placeholder="Hiệu suất (0.01-1)"
-                  value={newPanel.efficiency || ""}
-                  onChange={e => setNewPanel({ ...newPanel, efficiency: parseFloat(e.target.value) || 0 })}
-                />
-                <Input
-                  type="number"
                   placeholder="Công suất (W)"
                   value={newPanel.power || ""}
                   onChange={e => setNewPanel({ ...newPanel, power: parseInt(e.target.value) || 0 })}
+                  className="col-span-2"
                 />
               </div>
               <div className="flex mt-2 gap-2">
