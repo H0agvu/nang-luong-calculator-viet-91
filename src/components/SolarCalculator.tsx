@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { SolarPanel, inverters as defaultInverters } from "@/data/solarData";
+import { SolarPanel } from "@/interfaces/solarPanel";
+import { Inverter } from "@/interfaces/inverter";
+import { inverters as defaultInverters } from "@/data/inverters";
 import PanelSelection from "./PanelSelection";
 import InverterSelection from "./InverterSelection";
 import WiringCalculator from "./WiringCalculator";

@@ -1,6 +1,5 @@
-
 import { FC } from "react";
-import { Inverter } from "@/data/solarData";
+import { Inverter } from "@/interfaces/inverter";
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/table";
 import { Edit, Trash2, List } from "lucide-react";
 
@@ -76,4 +75,3 @@ const InverterList: FC<InverterListProps> = ({ inverters, onEdit, onDelete }) =>
 };
 
 export default InverterList;
-

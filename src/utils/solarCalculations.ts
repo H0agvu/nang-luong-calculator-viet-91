@@ -1,5 +1,6 @@
-
-import { Inverter, cableSizes, standardMCCBRatings } from "@/data/solarData";
+import { Inverter } from "@/interfaces/inverter";
+import { cableSizes } from "@/data/cableSizes";
+import { standardMCCBRatings } from "@/data/standardMCCBRatings";
 
 export interface InverterCombination {
   inverters: { inverter: Inverter; count: number }[];
