@@ -281,10 +281,10 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
             {hasHighCurrent && (
               <Alert
                 variant="destructive"
-                className="mb-4 border-yellow-400 text-yellow-400 bg-yellow-100"
+                className="mb-4 border-yellow-500 bg-yellow-50"
               >
-                <AlertCircle className="h-4 w-4 text-yellow-400" />
-                <AlertDescription className="text-yellow-400">
+                <AlertCircle className="h-4 w-4 text-yellow-600" />
+                <AlertDescription className="text-yellow-700 font-medium">
                   Một số dòng điện vượt quá khả năng của cáp đơn. Hệ thống đã tự động tính toán số lượng cáp song song cần thiết.
                 </AlertDescription>
               </Alert>
@@ -315,7 +315,7 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
                         <div className="col-span-2">
                           <span className="text-gray-600">Dây cáp:</span> {item.cable.type}
                           {item.cable.count > 1 && (
-                            <div className="mt-1 text-xs text-amber-600">
+                            <div className="mt-1 text-xs bg-amber-50 text-amber-800 px-2 py-1 rounded font-medium">
                               (Sử dụng {item.cable.count} cáp song song do dòng điện lớn)
                             </div>
                           )}
@@ -346,7 +346,7 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
                       <div className="col-span-2">
                         <span className="text-gray-600">Dây cáp:</span> {totalWiring.cable.type}
                         {totalWiring.cable.count > 1 && (
-                          <div className="mt-1 text-xs text-amber-600">
+                          <div className="mt-1 text-xs bg-amber-50 text-amber-800 px-2 py-1 rounded font-medium">
                             (Sử dụng {totalWiring.cable.count} cáp song song do dòng điện lớn)
                           </div>
                         )}
