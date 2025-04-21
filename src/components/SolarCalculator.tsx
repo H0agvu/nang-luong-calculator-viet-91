@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SolarPanel, inverters as defaultInverters } from "@/data/solarData";
@@ -83,7 +84,6 @@ const SolarCalculator = () => {
         </TabsList>
         
         <TabsContent value="input">
-          <InverterDataInput value={customInverters} onChange={setCustomInverters} />
           <PanelSelection 
             onPanelChange={handlePanelChange}
             onTotalPanelsChange={handleTotalPanelsChange}
@@ -143,9 +143,7 @@ const SolarCalculator = () => {
         </TabsContent>
 
         <TabsContent value="inverter-list">
-          <InverterList
-            inverters={customInverters}
-          />
+          <InverterDataInput value={customInverters} onChange={setCustomInverters} />
         </TabsContent>
       </Tabs>
     </div>
@@ -153,3 +151,4 @@ const SolarCalculator = () => {
 };
 
 export default SolarCalculator;
+
