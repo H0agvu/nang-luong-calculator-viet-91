@@ -1,9 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SolarPanel, inverters as defaultInverters } from "@/data/solarData";
 import PanelSelection from "./PanelSelection";
 import InverterSelection from "./InverterSelection";
 import WiringCalculator from "./WiringCalculator";
+import InverterDataInput from "./InverterDataInput";
 import { 
   calculateTotalPower, 
   calculateInverterPower, 
