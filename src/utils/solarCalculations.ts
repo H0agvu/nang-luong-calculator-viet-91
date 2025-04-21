@@ -225,10 +225,17 @@ export const findSuitableCable = (
   const multiCore = coreType === "multi";
   const pvc = insulationType === "PVC";
   
-  let maxCurrent = 0;
-  let selectedSize = 0;
+  // Tìm mặt cắt cáp và dòng tải lớn nhất trong bảng cáp
+  let maxCableCurrent = 0;
+  let maxCableSize = 0;
   
-  // Tìm cáp phù hợp
+  // Phương pháp lắp đặt
+  const installMethod = (phase === "3P") ? "threeLoad" : "twoLoad";
+  const coreMethod = multiCore ? "multiCore" : "singleCore";
+  const insulationMethod = pvc ? "pvc" : "xlpe";
+  const triangle = !multiCore && phase === "3P" ? "threeTriangle" : installMethod;
+  
+  // Tìm dòng tải lớn nhất từ bảng cáp
   for (const cable of cableSizes) {
     let cableCurrent = 0;
     
@@ -237,45 +244,78 @@ export const findSuitableCable = (
         ? (phase === "1P" ? cable.current.pvc.multiCore.twoLoad : cable.current.pvc.multiCore.threeLoad)
         : (phase === "1P" ? cable.current.xlpe.multiCore.twoLoad : cable.current.xlpe.multiCore.threeLoad);
     } else {
-      // Với cáp 1 lõi, giả định cách lắp đặt là dạng tam giác cho 3P và 2 lõi mang tải cho 1P
       cableCurrent = pvc
         ? (phase === "1P" ? cable.current.pvc.singleCore.twoLoad : cable.current.pvc.singleCore.threeTriangle)
         : (phase === "1P" ? cable.current.xlpe.singleCore.twoLoad : cable.current.xlpe.singleCore.threeTriangle);
     }
     
-    // Bỏ qua nếu không có thông số
-    if (cableCurrent === 0) continue;
-    
-    maxCurrent = cableCurrent;
-    selectedSize = cable.size;
+    // Lưu lại cáp có dòng tải lớn nhất
+    if (cableCurrent > maxCableCurrent) {
+      maxCableCurrent = cableCurrent;
+      maxCableSize = cable.size;
+    }
     
     // Nếu dòng điện phù hợp thì dừng lại
-    if (cableCurrent >= current) break;
+    if (cableCurrent >= current && cableCurrent > 0) {
+      return {
+        type: `0.6/1kV-CU/${insulationType}/PVC-${phase === "3P" ? "3x" : "2x"}${cable.size}+1x${getNeutralSize(cable.size)}mm²`,
+        count: 1,
+        mainCableSize: cable.size,
+        neutralCableSize: getNeutralSize(cable.size)
+      };
+    }
   }
   
   // Nếu không tìm được cáp phù hợp, tính số lượng cáp cần thiết
-  if (maxCurrent < current && maxCurrent > 0) {
-    const count = Math.ceil(current / maxCurrent);
-    result = {
-      type: `${count}x(${phase === "3P" ? "3x" : "2x"}${selectedSize}+1x${getNeutralSize(selectedSize)}mm²)`,
+  if (maxCableCurrent > 0) {
+    // Tính số lượng cáp cần thiết dựa trên dòng tải của cáp mặt cắt lớn nhất
+    const count = Math.ceil(current / maxCableCurrent);
+    
+    // Tính lại để tìm mặt cắt cáp tối ưu
+    const requiredCurrentPerCable = current / count;
+    
+    // Tìm mặt cắt cáp nhỏ nhất đáp ứng được yêu cầu (có thể nhỏ hơn maxCableSize)
+    let selectedSize = maxCableSize;
+    let selectedCurrent = maxCableCurrent;
+    
+    for (const cable of cableSizes) {
+      let cableCurrent = 0;
+      
+      if (multiCore) {
+        cableCurrent = pvc 
+          ? (phase === "1P" ? cable.current.pvc.multiCore.twoLoad : cable.current.pvc.multiCore.threeLoad)
+          : (phase === "1P" ? cable.current.xlpe.multiCore.twoLoad : cable.current.xlpe.multiCore.threeLoad);
+      } else {
+        cableCurrent = pvc
+          ? (phase === "1P" ? cable.current.pvc.singleCore.twoLoad : cable.current.pvc.singleCore.threeTriangle)
+          : (phase === "1P" ? cable.current.xlpe.singleCore.twoLoad : cable.current.xlpe.singleCore.threeTriangle);
+      }
+      
+      // Bỏ qua nếu không có thông số hoặc dòng không đủ
+      if (cableCurrent === 0 || cableCurrent < requiredCurrentPerCable) continue;
+      
+      // Chọn cáp nhỏ nhất đáp ứng được yêu cầu
+      if (cableCurrent >= requiredCurrentPerCable && (selectedCurrent > cableCurrent || selectedCurrent < requiredCurrentPerCable)) {
+        selectedSize = cable.size;
+        selectedCurrent = cableCurrent;
+      }
+    }
+    
+    return {
+      type: `0.6/1kV-CU/${insulationType}/PVC-${count}x(${phase === "3P" ? "3x" : "2x"}${selectedSize}+1x${getNeutralSize(selectedSize)}mm²)`,
       count,
       mainCableSize: selectedSize,
       neutralCableSize: getNeutralSize(selectedSize)
     };
-  } else if (maxCurrent >= current) {
-    // Nếu tìm được cáp phù hợp
-    result = {
-      type: `${phase === "3P" ? "3x" : "2x"}${selectedSize}+1x${getNeutralSize(selectedSize)}mm²`,
-      count: 1,
-      mainCableSize: selectedSize,
-      neutralCableSize: getNeutralSize(selectedSize)
-    };
   }
   
-  // Thêm thông tin vỏ cáp
-  result.type = `0.6/1kV-CU/${insulationType}/PVC-${result.type}`;
-  
-  return result;
+  // Mặc định trả về cáp lớn nhất nếu không tìm được cáp phù hợp
+  return {
+    type: `0.6/1kV-CU/${insulationType}/PVC-${phase === "3P" ? "3x" : "2x"}${maxCableSize}+1x${getNeutralSize(maxCableSize)}mm²`,
+    count: 1,
+    mainCableSize: maxCableSize,
+    neutralCableSize: getNeutralSize(maxCableSize)
+  };
 };
 
 // Hàm tính kích thước dây trung tính

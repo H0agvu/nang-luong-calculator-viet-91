@@ -5,14 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { calculateCurrent, findSuitableMCCB, findSuitableCable } from "@/utils/solarCalculations";
+  calculateCurrent, findSuitableMCCB, findSuitableCable
+} from "@/utils/solarCalculations";
 
 interface WiringCalculatorProps {
   inverterCombination: InverterCombination | null;
@@ -26,9 +23,12 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
 
   const [inverterWiring, setInverterWiring] = useState<any[]>([]);
   const [totalWiring, setTotalWiring] = useState<any | null>(null);
+  const [hasHighCurrent, setHasHighCurrent] = useState(false);
 
   useEffect(() => {
     if (!inverterCombination) return;
+
+    let detectedHighCurrent = false;
 
     // Tính toán cho từng loại inverter
     const wiringResults = inverterCombination.inverters.map(item => {
@@ -37,6 +37,10 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
       const current = calculateCurrent(inverter.power, voltage, phaseType, inverter.efficiency);
       const mccbRating = findSuitableMCCB(current);
       const cable = findSuitableCable(current, phaseType, coreType, insulationType, installationType);
+      
+      if (cable.count > 1) {
+        detectedHighCurrent = true;
+      }
 
       return {
         inverter,
@@ -59,6 +63,10 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
       const current = calculateCurrent(totalPower, voltage, phaseType, 99); // Giả định hiệu suất 99%
       const mccbRating = findSuitableMCCB(current);
       const cable = findSuitableCable(current, phaseType, coreType, insulationType, installationType);
+      
+      if (cable.count > 1) {
+        detectedHighCurrent = true;
+      }
 
       setTotalWiring({
         power: totalPower,
@@ -68,6 +76,8 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
         cable
       });
     }
+    
+    setHasHighCurrent(detectedHighCurrent);
   }, [inverterCombination, phaseType, coreType, insulationType, installationType]);
 
   if (!inverterCombination) {
@@ -161,6 +171,15 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
           </TabsContent>
           
           <TabsContent value="results" className="pt-4">
+            {hasHighCurrent && (
+              <Alert variant="warning" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Một số dòng điện vượt quá khả năng của cáp đơn. Hệ thống đã tự động tính toán số lượng cáp song song cần thiết.
+                </AlertDescription>
+              </Alert>
+            )}
+            
             <div className="space-y-6">
               <div>
                 <h3 className="font-semibold text-lg mb-3">Thông số Inverter đơn lẻ</h3>
@@ -185,6 +204,11 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
                         </div>
                         <div className="col-span-2">
                           <span className="text-gray-600">Dây cáp:</span> {item.cable.type}
+                          {item.cable.count > 1 && (
+                            <div className="mt-1 text-xs text-amber-600">
+                              (Sử dụng {item.cable.count} cáp song song do dòng điện lớn)
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -211,6 +235,11 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
                       </div>
                       <div className="col-span-2">
                         <span className="text-gray-600">Dây cáp:</span> {totalWiring.cable.type}
+                        {totalWiring.cable.count > 1 && (
+                          <div className="mt-1 text-xs text-amber-600">
+                            (Sử dụng {totalWiring.cable.count} cáp song song do dòng điện lớn)
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
