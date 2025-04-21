@@ -6,6 +6,7 @@ import WiringCalculator from "./WiringCalculator";
 import InverterDataInput from "./InverterDataInput";
 import InverterList from "./InverterList";
 import CalcHistory from "./CalcHistory";
+import ExcelActions from "./ExcelActions";
 import {
   calculateTotalPower,
   calculateInverterPower,
@@ -13,7 +14,7 @@ import {
   calculateDCACRatio,
   InverterCombination
 } from "@/utils/solarCalculations";
-import { Settings, Calculator, List, SlidersHorizontal, History as HistoryIcon } from "lucide-react";
+import { Settings, Calculator, List, SlidersHorizontal, History as HistoryIcon, Database } from "lucide-react";
 
 const MENU_LIST = [
   { key: "input", label: "Nhập liệu", icon: Calculator },
@@ -21,6 +22,7 @@ const MENU_LIST = [
   { key: "wiring", label: "Tính dây và MCCB", icon: Settings },
   { key: "inverter-list", label: "Danh sách inverter", icon: List },
   { key: "history", label: "Lịch sử", icon: HistoryIcon },
+  { key: "excel", label: "Xuất/Nhập Excel", icon: Database },
 ];
 
 const SolarCalculator = () => {
@@ -86,6 +88,25 @@ const SolarCalculator = () => {
       setDcAcRatio(0);
     }
   }, [selectedPanel, totalPanels, customInverters]);
+
+  const handleImportData = (data: any) => {
+    if (data.inverters && data.inverters.length > 0) {
+      // Cập nhật danh sách inverter
+      const formattedInverters: Inverter[] = data.inverters.map((inv: any) => ({
+        id: inv.id || `${inv.name}-${inv.power}`,
+        name: inv.name,
+        power: Number(inv.power),
+        efficiency: Number(inv.efficiency) || 0,
+        mpptCount: Number(inv.mpptCount) || 0
+      }));
+      setCustomInverters(formattedInverters);
+    }
+
+    if (data.history && data.history.length > 0) {
+      // Cập nhật lịch sử
+      setCalcHistory(data.history);
+    }
+  };
 
   const isInputCompleted = !!selectedPanel && totalPanels > 0;
   const isOutputAvailable = isInputCompleted;
@@ -270,6 +291,16 @@ const SolarCalculator = () => {
           {activeMenu === "history" && (
             <div>
               <CalcHistory history={calcHistory} />
+            </div>
+          )}
+
+          {activeMenu === "excel" && (
+            <div>
+              <ExcelActions 
+                inverters={customInverters}
+                history={calcHistory}
+                onImportData={handleImportData}
+              />
             </div>
           )}
         </div>
