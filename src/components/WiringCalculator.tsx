@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { InverterCombination } from "@/utils/solarCalculations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -281,10 +280,10 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
             {hasHighCurrent && (
               <Alert
                 variant="destructive"
-                className="mb-4 border-yellow-500 bg-yellow-50"
+                className="mb-4 border-[#FEC6A1] bg-[#FEF7CD]"
               >
-                <AlertCircle className="h-4 w-4 text-yellow-600" />
-                <AlertDescription className="text-yellow-700 font-medium">
+                <AlertCircle className="h-4 w-4 text-[#F97316]" />
+                <AlertDescription className="text-[#F97316] font-medium">
                   Một số dòng điện vượt quá khả năng của cáp đơn. Hệ thống đã tự động tính toán số lượng cáp song song cần thiết.
                 </AlertDescription>
               </Alert>
@@ -364,4 +363,3 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
 };
 
 export default WiringCalculator;
-
