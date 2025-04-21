@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SolarPanel, inverters as defaultInverters } from "@/data/solarData";
@@ -40,7 +39,7 @@ const SolarCalculator = () => {
       setInverterCombination(combination);
       
       if (combination.totalPower > 0) {
-        const ratio = calculateDCACRatio(combination.totalPower * 1000, power);
+        const ratio = calculateDCACRatio(power, combination.totalPower * 1000);
         setDcAcRatio(ratio);
       }
     } else {
