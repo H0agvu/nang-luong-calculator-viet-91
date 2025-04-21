@@ -1,4 +1,3 @@
-
 import { InverterCombination } from "@/utils/solarCalculations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -77,7 +76,7 @@ const InverterSelection = ({
 
             <div className="pt-2">
               <div className="text-lg font-medium mb-2">Tỷ số DC/AC</div>
-              <div className="text-2xl font-bold mb-1">
+              <div className={`text-2xl font-bold mb-1 ${isValidRatio ? "" : "text-red-600"}`}>
                 {dcAcRatio.toFixed(2)}
               </div>
               <Progress value={((dcAcRatio - 1) / 0.25) * 100} className="h-2" />

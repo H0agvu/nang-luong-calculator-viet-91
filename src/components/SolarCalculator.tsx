@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SolarPanel, inverters } from "@/data/solarData";
+import { SolarPanel, inverters as defaultInverters } from "@/data/solarData";
 import PanelSelection from "./PanelSelection";
 import InverterSelection from "./InverterSelection";
 import WiringCalculator from "./WiringCalculator";
@@ -25,8 +24,8 @@ const SolarCalculator = () => {
   const [dcAcRatio, setDcAcRatio] = useState<number>(0);
   
   const [activeTab, setActiveTab] = useState<string>("input");
+  const [customInverters, setCustomInverters] = useState(defaultInverters);
 
-  // Tính toán công suất tổng và công suất inverter
   useEffect(() => {
     if (selectedPanel && totalPanels > 0) {
       const power = calculateTotalPower(selectedPanel.power, totalPanels);
@@ -35,11 +34,9 @@ const SolarCalculator = () => {
       const invPower = calculateInverterPower(power);
       setInverterPower(invPower);
       
-      // Tìm tổ hợp inverter tối ưu
-      const combination = findOptimalInverterCombination(invPower / 1000, inverters);
+      const combination = findOptimalInverterCombination(invPower / 1000, customInverters);
       setInverterCombination(combination);
       
-      // Tính tỷ số DC/AC
       if (combination.totalPower > 0) {
         const ratio = calculateDCACRatio(combination.totalPower * 1000, power);
         setDcAcRatio(ratio);
@@ -50,7 +47,7 @@ const SolarCalculator = () => {
       setInverterCombination(null);
       setDcAcRatio(0);
     }
-  }, [selectedPanel, totalPanels]);
+  }, [selectedPanel, totalPanels, customInverters]);
 
   const handlePanelChange = (panel: SolarPanel | null) => {
     setSelectedPanel(panel);
@@ -83,6 +80,7 @@ const SolarCalculator = () => {
         </TabsList>
         
         <TabsContent value="input">
+          <InverterDataInput value={customInverters} onChange={setCustomInverters} />
           <PanelSelection 
             onPanelChange={handlePanelChange}
             onTotalPanelsChange={handleTotalPanelsChange}
