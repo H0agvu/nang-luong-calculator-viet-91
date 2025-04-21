@@ -1,9 +1,0 @@
-
-{
-  "scripts": {
-    "electron:dev": "concurrently -k \"npm run dev\" \"npm run electron:start\"",
-    "electron:start": "wait-on tcp:8080 && electron electron/main.js",
-    "electron:build": "npm run build && electron-builder --config electron-builder.json",
-    "electron:buildWin": "npm run build && electron-builder --win --config electron-builder.json"
-  }
-}
