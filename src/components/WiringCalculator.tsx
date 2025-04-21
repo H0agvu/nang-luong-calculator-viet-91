@@ -16,10 +16,16 @@ interface WiringCalculatorProps {
 }
 
 const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
-  const [phaseType, setPhaseType] = useState<"1P" | "3P">("3P");
-  const [coreType, setCoreType] = useState<"single" | "multi">("multi");
-  const [insulationType, setInsulationType] = useState<"PVC" | "XLPE">("XLPE");
-  const [installationType, setInstallationType] = useState<"underground" | "air">("air");
+  // Thiết lập cho inverter đơn lẻ
+  const [singlePhaseType, setSinglePhaseType] = useState<"1P" | "3P">("3P");
+  const [singleCoreType, setSingleCoreType] = useState<"single" | "multi">("multi");
+  const [singleInsulationType, setSingleInsulationType] = useState<"PVC" | "XLPE">("XLPE");
+  const [singleInstallationType, setSingleInstallationType] = useState<"underground" | "air">("air");
+  // Thiết lập cho tủ tổng
+  const [totalPhaseType, setTotalPhaseType] = useState<"1P" | "3P">("3P");
+  const [totalCoreType, setTotalCoreType] = useState<"single" | "multi">("multi");
+  const [totalInsulationType, setTotalInsulationType] = useState<"PVC" | "XLPE">("XLPE");
+  const [totalInstallationType, setTotalInstallationType] = useState<"underground" | "air">("air");
 
   const [inverterWiring, setInverterWiring] = useState<any[]>([]);
   const [totalWiring, setTotalWiring] = useState<any | null>(null);
@@ -30,14 +36,20 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
 
     let detectedHighCurrent = false;
 
-    // Tính toán cho từng loại inverter
+    // Tính cho từng inverter đơn lẻ
     const wiringResults = inverterCombination.inverters.map(item => {
       const { inverter, count } = item;
-      const voltage = phaseType === "1P" ? 220 : 380;
-      const current = calculateCurrent(inverter.power, voltage, phaseType, inverter.efficiency);
+      const voltage = singlePhaseType === "1P" ? 220 : 380;
+      const current = calculateCurrent(inverter.power, voltage, singlePhaseType, inverter.efficiency);
       const mccbRating = findSuitableMCCB(current);
-      const cable = findSuitableCable(current, phaseType, coreType, insulationType, installationType);
-      
+      const cable = findSuitableCable(
+        current,
+        singlePhaseType,
+        singleCoreType,
+        singleInsulationType,
+        singleInstallationType
+      );
+
       if (cable.count > 1) {
         detectedHighCurrent = true;
       }
@@ -45,7 +57,7 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
       return {
         inverter,
         count,
-        phaseType,
+        phaseType: singlePhaseType,
         voltage,
         current: current.toFixed(2),
         mccbRating,
@@ -57,13 +69,18 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
 
     // Tính toán cho tủ tổng
     if (wiringResults.length > 0) {
-      // Tính tổng công suất từ tất cả inverter
       const totalPower = inverterCombination.totalPower;
-      const voltage = phaseType === "1P" ? 220 : 380;
-      const current = calculateCurrent(totalPower, voltage, phaseType, 99); // Giả định hiệu suất 99%
+      const voltage = totalPhaseType === "1P" ? 220 : 380;
+      const current = calculateCurrent(totalPower, voltage, totalPhaseType, 99); // Giả định hiệu suất 99%
       const mccbRating = findSuitableMCCB(current);
-      const cable = findSuitableCable(current, phaseType, coreType, insulationType, installationType);
-      
+      const cable = findSuitableCable(
+        current,
+        totalPhaseType,
+        totalCoreType,
+        totalInsulationType,
+        totalInstallationType
+      );
+
       if (cable.count > 1) {
         detectedHighCurrent = true;
       }
@@ -76,9 +93,20 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
         cable
       });
     }
-    
+
     setHasHighCurrent(detectedHighCurrent);
-  }, [inverterCombination, phaseType, coreType, insulationType, installationType]);
+    // eslint-disable-next-line
+  }, [
+    inverterCombination,
+    singlePhaseType,
+    singleCoreType,
+    singleInsulationType,
+    singleInstallationType,
+    totalPhaseType,
+    totalCoreType,
+    totalInsulationType,
+    totalInstallationType
+  ]);
 
   if (!inverterCombination) {
     return null;
@@ -95,81 +123,160 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
             <TabsTrigger value="settings">Thiết lập</TabsTrigger>
             <TabsTrigger value="results">Kết quả</TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="settings" className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <div className="font-medium">Loại pha</div>
-              <RadioGroup 
-                value={phaseType} 
-                onValueChange={(value) => setPhaseType(value as "1P" | "3P")}
-                className="flex space-x-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="1P" id="phase-1p" />
-                  <Label htmlFor="phase-1p">1 Pha (220V)</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="3P" id="phase-3p" />
-                  <Label htmlFor="phase-3p">3 Pha (380V)</Label>
-                </div>
-              </RadioGroup>
-            </div>
 
-            <div className="space-y-2">
-              <div className="font-medium">Loại lõi dây</div>
-              <RadioGroup 
-                value={coreType} 
-                onValueChange={(value) => setCoreType(value as "single" | "multi")}
-                className="flex space-x-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="single" id="core-single" />
-                  <Label htmlFor="core-single">Lõi đơn</Label>
+          {/* TabsContent Thiết Lập */}
+          <TabsContent value="settings" className="space-y-8 pt-4">
+            {/* Group 1: Cho inverter đơn lẻ */}
+            <div className="border rounded-lg p-4">
+              <div className="font-semibold mb-4 text-blue-700">Thiết lập dây/mccb cho <span className="underline">inverter đơn lẻ</span></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <div className="font-medium">Loại pha</div>
+                  <RadioGroup
+                    value={singlePhaseType}
+                    onValueChange={(value) => setSinglePhaseType(value as "1P" | "3P")}
+                    className="flex space-x-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="1P" id="single-phase-1p" />
+                      <Label htmlFor="single-phase-1p">1 Pha (220V)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="3P" id="single-phase-3p" />
+                      <Label htmlFor="single-phase-3p">3 Pha (380V)</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="multi" id="core-multi" />
-                  <Label htmlFor="core-multi">Lõi nhiều sợi</Label>
+                <div className="space-y-2">
+                  <div className="font-medium">Loại lõi dây</div>
+                  <RadioGroup
+                    value={singleCoreType}
+                    onValueChange={(value) => setSingleCoreType(value as "single" | "multi")}
+                    className="flex space-x-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="single" id="single-core-single" />
+                      <Label htmlFor="single-core-single">Lõi đơn</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="multi" id="single-core-multi" />
+                      <Label htmlFor="single-core-multi">Lõi nhiều sợi</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
-              </RadioGroup>
+                <div className="space-y-2">
+                  <div className="font-medium">Loại vỏ dây</div>
+                  <RadioGroup
+                    value={singleInsulationType}
+                    onValueChange={(value) => setSingleInsulationType(value as "PVC" | "XLPE")}
+                    className="flex space-x-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="PVC" id="single-insulation-pvc" />
+                      <Label htmlFor="single-insulation-pvc">Vỏ PVC</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="XLPE" id="single-insulation-xlpe" />
+                      <Label htmlFor="single-insulation-xlpe">Vỏ XLPE</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+                <div className="space-y-2">
+                  <div className="font-medium">Phương pháp lắp đặt</div>
+                  <RadioGroup
+                    value={singleInstallationType}
+                    onValueChange={(value) => setSingleInstallationType(value as "underground" | "air")}
+                    className="flex space-x-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="underground" id="single-install-underground" />
+                      <Label htmlFor="single-install-underground">Đi ngầm</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="air" id="single-install-air" />
+                      <Label htmlFor="single-install-air">Đi trong không khí</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <div className="font-medium">Loại vỏ dây</div>
-              <RadioGroup 
-                value={insulationType} 
-                onValueChange={(value) => setInsulationType(value as "PVC" | "XLPE")}
-                className="flex space-x-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="PVC" id="insulation-pvc" />
-                  <Label htmlFor="insulation-pvc">Vỏ PVC</Label>
+            {/* Group 2: Cho tủ tổng */}
+            <div className="border rounded-lg p-4">
+              <div className="font-semibold mb-4 text-green-700">Thiết lập dây/mccb cho <span className="underline">tủ tổng</span></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <div className="font-medium">Loại pha</div>
+                  <RadioGroup
+                    value={totalPhaseType}
+                    onValueChange={(value) => setTotalPhaseType(value as "1P" | "3P")}
+                    className="flex space-x-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="1P" id="total-phase-1p" />
+                      <Label htmlFor="total-phase-1p">1 Pha (220V)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="3P" id="total-phase-3p" />
+                      <Label htmlFor="total-phase-3p">3 Pha (380V)</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="XLPE" id="insulation-xlpe" />
-                  <Label htmlFor="insulation-xlpe">Vỏ XLPE</Label>
+                <div className="space-y-2">
+                  <div className="font-medium">Loại lõi dây</div>
+                  <RadioGroup
+                    value={totalCoreType}
+                    onValueChange={(value) => setTotalCoreType(value as "single" | "multi")}
+                    className="flex space-x-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="single" id="total-core-single" />
+                      <Label htmlFor="total-core-single">Lõi đơn</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="multi" id="total-core-multi" />
+                      <Label htmlFor="total-core-multi">Lõi nhiều sợi</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
-              </RadioGroup>
-            </div>
-
-            <div className="space-y-2">
-              <div className="font-medium">Phương pháp lắp đặt</div>
-              <RadioGroup 
-                value={installationType} 
-                onValueChange={(value) => setInstallationType(value as "underground" | "air")}
-                className="flex space-x-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="underground" id="installation-underground" />
-                  <Label htmlFor="installation-underground">Đi ngầm</Label>
+                <div className="space-y-2">
+                  <div className="font-medium">Loại vỏ dây</div>
+                  <RadioGroup
+                    value={totalInsulationType}
+                    onValueChange={(value) => setTotalInsulationType(value as "PVC" | "XLPE")}
+                    className="flex space-x-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="PVC" id="total-insulation-pvc" />
+                      <Label htmlFor="total-insulation-pvc">Vỏ PVC</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="XLPE" id="total-insulation-xlpe" />
+                      <Label htmlFor="total-insulation-xlpe">Vỏ XLPE</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="air" id="installation-air" />
-                  <Label htmlFor="installation-air">Đi trong không khí</Label>
+                <div className="space-y-2">
+                  <div className="font-medium">Phương pháp lắp đặt</div>
+                  <RadioGroup
+                    value={totalInstallationType}
+                    onValueChange={(value) => setTotalInstallationType(value as "underground" | "air")}
+                    className="flex space-x-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="underground" id="total-install-underground" />
+                      <Label htmlFor="total-install-underground">Đi ngầm</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="air" id="total-install-air" />
+                      <Label htmlFor="total-install-air">Đi trong không khí</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
-              </RadioGroup>
+              </div>
             </div>
           </TabsContent>
-          
+
+          {/* TabsContent Kết quả */}
           <TabsContent value="results" className="pt-4">
             {hasHighCurrent && (
               <Alert variant="destructive" className="mb-4">
@@ -179,7 +286,7 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
                 </AlertDescription>
               </Alert>
             )}
-            
+
             <div className="space-y-6">
               <div>
                 <h3 className="font-semibold text-lg mb-3">Thông số Inverter đơn lẻ</h3>
@@ -254,4 +361,3 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
 };
 
 export default WiringCalculator;
-
