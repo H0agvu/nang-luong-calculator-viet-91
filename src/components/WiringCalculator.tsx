@@ -39,8 +39,8 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
     const wiringResults = inverterCombination.inverters.map(item => {
       const { inverter, count } = item;
       const voltage = singlePhaseType === "1P" ? 220 : 380;
-      const current = calculateCurrent(inverter.power, voltage, singlePhaseType, inverter.efficiency) * 1.25;
-      const mccbRating = findSuitableMCCB(current);
+      const current = calculateCurrent(inverter.power, voltage, singlePhaseType, inverter.efficiency);
+      const mccbRating = findSuitableMCCB(current * 1.25);
       const cable = findSuitableCable(
         current,
         singlePhaseType,
@@ -70,8 +70,8 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
     if (wiringResults.length > 0) {
       const totalPower = inverterCombination.totalPower;
       const voltage = totalPhaseType === "1P" ? 220 : 380;
-      const current = calculateCurrent(totalPower, voltage, totalPhaseType, 99) * 1.25; // Giả định hiệu suất 99%
-      const mccbRating = findSuitableMCCB(current);
+      const current = calculateCurrent(totalPower, voltage, totalPhaseType, 99); // Giả định hiệu suất 99%
+      const mccbRating = findSuitableMCCB(current * 1.25);
       const cable = findSuitableCable(
         current,
         totalPhaseType,
