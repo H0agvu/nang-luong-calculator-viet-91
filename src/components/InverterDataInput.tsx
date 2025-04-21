@@ -4,12 +4,7 @@ import { Inverter } from "@/data/solarData";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ListCheck, LayoutList } from "lucide-react";
-
-interface InverterDataInputProps {
-  value: Inverter[];
-  onChange: (data: Inverter[]) => void;
-}
+import { ListCheck, LayoutList, Edit, Trash2 } from "lucide-react";
 
 const defaultInverter = {
   id: "",
@@ -18,6 +13,11 @@ const defaultInverter = {
   efficiency: 0,
   mpptCount: 0,
 };
+
+interface InverterDataInputProps {
+  value: Inverter[];
+  onChange: (data: Inverter[]) => void;
+}
 
 const InverterDataInput = ({ value, onChange }: InverterDataInputProps) => {
   const [inverters, setInverters] = useState<Inverter[]>(value);
@@ -129,51 +129,60 @@ const InverterDataInput = ({ value, onChange }: InverterDataInputProps) => {
             <ListCheck className="w-4 h-4 text-green-600" />
             Danh sách inverter
           </div>
-          <div className="flex flex-wrap gap-4 overflow-x-auto pb-1.5">
-            {inverters.length === 0 && (
-              <div className="w-full text-center text-gray-500 py-2 bg-white border rounded shadow-sm">
-                Chưa có dữ liệu inverter nào
-              </div>
-            )}
-            {inverters.map((inv, idx) => (
-              <div
-                key={inv.id}
-                className="min-w-[210px] max-w-xs bg-white border border-gray-200 rounded-lg shadow-sm p-4 relative group hover:shadow-lg transition-shadow duration-200 animate-fade-in"
-              >
-                <div className="flex justify-between mb-2 items-center">
-                  <span className="font-semibold text-blue-800">{inv.name}</span>
-                  <span className="text-xs text-gray-400">{inv.power}kW</span>
-                </div>
-                <div className="flex flex-col gap-0.5 text-sm mb-3">
-                  <div>
-                    <span className="text-gray-500">Hiệu suất:</span>{" "}
-                    <span className="font-medium">{inv.efficiency}%</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">MPPT:</span>{" "}
-                    <span className="font-medium">{inv.mpptCount}</span>
-                  </div>
-                </div>
-                <div className="flex gap-2 absolute top-3 right-3 opacity-60 group-hover:opacity-100 transition-opacity">
-                  <button
-                    className="hover:scale-110 transition text-blue-600"
-                    title="Sửa"
-                    onClick={() => startEdit(idx)}
-                    type="button"
+          <div className="overflow-x-auto bg-white rounded shadow-sm border">
+            <table className="min-w-full table-auto text-sm [&>thead>tr]:bg-blue-50 [&>thead>tr]:text-blue-800 animate-fade-in">
+              <thead>
+                <tr>
+                  <th className="py-2 px-3 font-semibold">#</th>
+                  <th className="py-2 px-3 font-semibold text-left">Tên inverter</th>
+                  <th className="py-2 px-3 font-semibold">Công suất (kW)</th>
+                  <th className="py-2 px-3 font-semibold">Hiệu suất (%)</th>
+                  <th className="py-2 px-3 font-semibold">MPPT</th>
+                  <th className="py-2 px-3 font-semibold">Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                {inverters.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="text-center text-gray-500 py-3">
+                      Chưa có dữ liệu inverter nào
+                    </td>
+                  </tr>
+                )}
+                {inverters.map((inv, idx) => (
+                  <tr
+                    key={inv.id}
+                    className="border-t hover:bg-blue-50 transition animate-fade-in"
                   >
-                    <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19.5 3 21l1.5-4L16.5 3.5z" /></svg>
-                  </button>
-                  <button
-                    className="hover:scale-110 transition text-red-600"
-                    title="Xoá"
-                    onClick={() => removeInverter(idx)}
-                    type="button"
-                  >
-                    <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
-                  </button>
-                </div>
-              </div>
-            ))}
+                    <td className="py-2 px-3 text-center">{idx + 1}</td>
+                    <td className="py-2 px-3 font-medium">{inv.name}</td>
+                    <td className="py-2 px-3 text-center">{inv.power}</td>
+                    <td className="py-2 px-3 text-center">{inv.efficiency}%</td>
+                    <td className="py-2 px-3 text-center">{inv.mpptCount}</td>
+                    <td className="py-2 px-3 flex gap-3 justify-center">
+                      <button
+                        className="hover-scale text-blue-600"
+                        title="Sửa"
+                        onClick={() => startEdit(idx)}
+                        type="button"
+                        aria-label="Sửa inverter"
+                      >
+                        <Edit className="w-5 h-5" />
+                      </button>
+                      <button
+                        className="hover-scale text-red-600"
+                        title="Xoá"
+                        onClick={() => removeInverter(idx)}
+                        type="button"
+                        aria-label="Xoá inverter"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </CardContent>
@@ -182,3 +191,4 @@ const InverterDataInput = ({ value, onChange }: InverterDataInputProps) => {
 };
 
 export default InverterDataInput;
+
