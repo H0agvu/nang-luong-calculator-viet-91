@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { SolarPanel, inverters as defaultInverters } from "@/data/solarData";
 import PanelSelection from "./PanelSelection";
@@ -5,6 +6,7 @@ import InverterSelection from "./InverterSelection";
 import WiringCalculator from "./WiringCalculator";
 import InverterDataInput from "./InverterDataInput";
 import InverterList from "./InverterList";
+import CalcHistory from "./CalcHistory";
 import {
   calculateTotalPower,
   calculateInverterPower,
@@ -12,13 +14,14 @@ import {
   calculateDCACRatio,
   InverterCombination
 } from "@/utils/solarCalculations";
-import { Settings, Calculator, List, SlidersHorizontal } from "lucide-react";
+import { Settings, Calculator, List, SlidersHorizontal, History as HistoryIcon } from "lucide-react";
 
 const MENU_LIST = [
   { key: "input", label: "Nhập liệu", icon: Calculator },
   { key: "output", label: "Kết quả Inverter", icon: SlidersHorizontal },
   { key: "wiring", label: "Tính dây và MCCB", icon: Settings },
   { key: "inverter-list", label: "Danh sách inverter", icon: List },
+  { key: "history", label: "Lịch sử", icon: HistoryIcon },
 ];
 
 const SolarCalculator = () => {
@@ -34,6 +37,37 @@ const SolarCalculator = () => {
 
   const [activeMenu, setActiveMenu] = useState<string>("input");
   const [customInverters, setCustomInverters] = useState(defaultInverters);
+
+  // Thêm lưu lịch sử
+  const [calcHistory, setCalcHistory] = useState<
+    {
+      time: string;
+      panelName: string;
+      totalPanels: number;
+      strings: number;
+      inverterResult: string;
+      dcAcRatio: number;
+    }[]
+  >([]);
+
+  // Sử dụng 1 state lưu lại dữ liệu nhập lần cuối
+  const [inputSnapshot, setInputSnapshot] = useState<{
+    selectedPanel: SolarPanel | null;
+    totalPanels: number;
+    strings: number;
+    panelsPerString: number;
+  } | null>(null);
+
+  // Xử lý giữ lại dữ liệu khi quay lại tab nhập liệu
+  useEffect(() => {
+    if (activeMenu === "input" && inputSnapshot !== null) {
+      setSelectedPanel(inputSnapshot.selectedPanel);
+      setTotalPanels(inputSnapshot.totalPanels);
+      setStrings(inputSnapshot.strings);
+      setPanelsPerString(inputSnapshot.panelsPerString);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeMenu]);
 
   useEffect(() => {
     if (selectedPanel && totalPanels > 0) {
@@ -63,7 +97,38 @@ const SolarCalculator = () => {
   const isWiringAvailable = inverterCombination !== null && inverterCombination.totalPower > 0;
 
   const handleMenuClick = (menuKey: string) => {
+    // Lưu snapshot inputs khi chuyển tab (chỉ khi ở tab input)
+    if (activeMenu === "input") {
+      setInputSnapshot({
+        selectedPanel,
+        totalPanels,
+        strings,
+        panelsPerString,
+      });
+    }
     setActiveMenu(menuKey);
+  };
+
+  // Hàm lưu lịch sử khi thực hiện tính toán inverter
+  const handleSaveHistory = () => {
+    if (!selectedPanel || !inverterCombination) return;
+    const inverterSummary = inverterCombination.inverters
+      .map(
+        (inv) =>
+          `${inv.count}x ${inv.inverter.name} (${inv.inverter.power}kW)`
+      )
+      .join(" + ");
+    setCalcHistory((prev) => [
+      {
+        time: new Date().toLocaleString("vi-VN"),
+        panelName: selectedPanel.name,
+        totalPanels,
+        strings,
+        inverterResult: inverterSummary,
+        dcAcRatio,
+      },
+      ...prev,
+    ]);
   };
 
   return (
@@ -145,7 +210,10 @@ const SolarCalculator = () => {
                 <div className="mt-4 text-right">
                   <button
                     className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
-                    onClick={() => handleMenuClick("output")}
+                    onClick={() => {
+                      handleSaveHistory();
+                      handleMenuClick("output");
+                    }}
                     type="button"
                   >
                     Xem kết quả
@@ -204,6 +272,12 @@ const SolarCalculator = () => {
               <InverterDataInput value={customInverters} onChange={setCustomInverters} />
             </div>
           )}
+
+          {activeMenu === "history" && (
+            <div>
+              <CalcHistory history={calcHistory} />
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -211,3 +285,4 @@ const SolarCalculator = () => {
 };
 
 export default SolarCalculator;
+
