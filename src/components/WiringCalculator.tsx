@@ -70,10 +70,10 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
 
     // Tính toán cho tủ tổng
     if (wiringResults.length > 0) {
-      const factor = 1.25; // Hệ số nhân dòng điện tổng
       const totalPower = inverterCombination.totalPower;
       const voltage = totalPhaseType === "1P" ? 220 : 380;
-      const current = calculateCurrent(totalPower, voltage, totalPhaseType, 99); // Giả định hiệu suất 99%
+      let current = calculateCurrent(totalPower, voltage, totalPhaseType, 99); // Giả định hiệu suất 99%
+      current = current * 1.25; // Nhân hệ số 1.25
       const mccbRating = findSuitableMCCB(current);
       const cable = findSuitableCable(
         current,
