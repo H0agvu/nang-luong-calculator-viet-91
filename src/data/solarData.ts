@@ -62,8 +62,8 @@ export const inverters: Inverter[] = [
   { id: "solis-60", name: "Solis 60kW", power: 60, efficiency: 98, mpptCount: 12 },
   { id: "solis-80", name: "Solis 80kW", power: 80, efficiency: 98, mpptCount: 16 },
   { id: "solis-100", name: "Solis 100kW", power: 100, efficiency: 98, mpptCount: 20 },
-  { id: "solis-110", name: "Solis 110kW", power: 110, efficiency: 98, mpptCount: 20 },
-  { id: "solis-125", name: "Solis 125kW", power: 125, efficiency: 98, mpptCount: 20 },
+  { id: "solis-110", name: "Solis 110kW", power: 110, efficiency: 98, mpptCount: 20 }
+  { id: "solis-125", name: "Solis 125kW", power: 125, efficiency: 98, mpptCount: 20 }
 ];
 
 export interface CableSize {
