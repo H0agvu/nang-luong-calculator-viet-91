@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LayoutList } from "lucide-react";
-import InverterTabs from "./InverterTabs";
+import InverterList from "./InverterList";
 
 const defaultInverter = {
   id: "",
@@ -124,13 +124,13 @@ const InverterDataInput = ({ value, onChange }: InverterDataInputProps) => {
             )}
           </div>
         </form>
-        {/* Thay bảng bằng tab inverter */}
+        {/* Thay bảng bằng danh sách inverter */}
         <div>
           <div className="font-semibold mb-2 flex gap-2 items-center">
             <LayoutList className="w-4 h-4 text-green-600" />
             Danh sách inverter
           </div>
-          <InverterTabs 
+          <InverterList 
             inverters={inverters}
             onEdit={startEdit}
             onDelete={removeInverter}
@@ -142,4 +142,3 @@ const InverterDataInput = ({ value, onChange }: InverterDataInputProps) => {
 };
 
 export default InverterDataInput;
-
