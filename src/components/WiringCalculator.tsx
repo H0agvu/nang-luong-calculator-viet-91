@@ -279,9 +279,12 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
           {/* TabsContent Kết quả */}
           <TabsContent value="results" className="pt-4">
             {hasHighCurrent && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
+              <Alert
+                variant="destructive"
+                className="mb-4 border-yellow-400 text-yellow-400 bg-yellow-100"
+              >
+                <AlertCircle className="h-4 w-4 text-yellow-400" />
+                <AlertDescription className="text-yellow-400">
                   Một số dòng điện vượt quá khả năng của cáp đơn. Hệ thống đã tự động tính toán số lượng cáp song song cần thiết.
                 </AlertDescription>
               </Alert>
@@ -361,3 +364,4 @@ const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
 };
 
 export default WiringCalculator;
+
