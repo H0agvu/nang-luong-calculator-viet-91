@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { SolarPanel, inverters as defaultInverters } from "@/data/solarData";
 import PanelSelection from "./PanelSelection";
@@ -38,7 +37,6 @@ const SolarCalculator = () => {
   const [activeMenu, setActiveMenu] = useState<string>("input");
   const [customInverters, setCustomInverters] = useState(defaultInverters);
 
-  // Thêm lưu lịch sử
   const [calcHistory, setCalcHistory] = useState<
     {
       time: string;
@@ -50,7 +48,6 @@ const SolarCalculator = () => {
     }[]
   >([]);
 
-  // Sử dụng 1 state lưu lại dữ liệu nhập lần cuối
   const [inputSnapshot, setInputSnapshot] = useState<{
     selectedPanel: SolarPanel | null;
     totalPanels: number;
@@ -58,7 +55,6 @@ const SolarCalculator = () => {
     panelsPerString: number;
   } | null>(null);
 
-  // Xử lý giữ lại dữ liệu khi quay lại tab nhập liệu
   useEffect(() => {
     if (activeMenu === "input" && inputSnapshot !== null) {
       setSelectedPanel(inputSnapshot.selectedPanel);
@@ -66,7 +62,6 @@ const SolarCalculator = () => {
       setStrings(inputSnapshot.strings);
       setPanelsPerString(inputSnapshot.panelsPerString);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu]);
 
   useEffect(() => {
@@ -97,7 +92,6 @@ const SolarCalculator = () => {
   const isWiringAvailable = inverterCombination !== null && inverterCombination.totalPower > 0;
 
   const handleMenuClick = (menuKey: string) => {
-    // Lưu snapshot inputs khi chuyển tab (chỉ khi ở tab input)
     if (activeMenu === "input") {
       setInputSnapshot({
         selectedPanel,
@@ -109,7 +103,6 @@ const SolarCalculator = () => {
     setActiveMenu(menuKey);
   };
 
-  // Hàm lưu lịch sử khi thực hiện tính toán inverter
   const handleSaveHistory = () => {
     if (!selectedPanel || !inverterCombination) return;
     const inverterSummary = inverterCombination.inverters
@@ -285,4 +278,3 @@ const SolarCalculator = () => {
 };
 
 export default SolarCalculator;
-

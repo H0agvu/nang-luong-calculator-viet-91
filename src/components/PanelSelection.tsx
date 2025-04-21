@@ -17,18 +17,28 @@ interface PanelSelectionProps {
   onTotalPanelsChange: (total: number) => void;
   onStringsChange: (strings: number) => void;
   onPanelsPerStringChange: (panels: number) => void;
+  // Add the props that are being passed from SolarCalculator.tsx
+  selectedPanel?: SolarPanel | null;
+  totalPanels?: number;
+  strings?: number;
+  panelsPerString?: number;
 }
 
 const PanelSelection = ({
   onPanelChange,
   onTotalPanelsChange,
   onStringsChange,
-  onPanelsPerStringChange
+  onPanelsPerStringChange,
+  // Use the passed props with default values
+  selectedPanel: initialSelectedPanel = null,
+  totalPanels: initialTotalPanels = 0,
+  strings: initialStrings = 0,
+  panelsPerString: initialPanelsPerString = 0
 }: PanelSelectionProps) => {
-  const [selectedPanelId, setSelectedPanelId] = useState<string>("");
-  const [totalPanels, setTotalPanels] = useState<number>(0);
-  const [strings, setStrings] = useState<number>(0);
-  const [panelsPerString, setPanelsPerString] = useState<number>(0);
+  const [selectedPanelId, setSelectedPanelId] = useState<string>(initialSelectedPanel?.id || "");
+  const [totalPanels, setTotalPanels] = useState<number>(initialTotalPanels);
+  const [strings, setStrings] = useState<number>(initialStrings);
+  const [panelsPerString, setPanelsPerString] = useState<number>(initialPanelsPerString);
 
   // New: fake panel data state for runtime added panels
   const [panels, setPanels] = useState<SolarPanel[]>(solarPanels);
@@ -40,6 +50,23 @@ const PanelSelection = ({
     efficiency: 1,
     power: 0,
   });
+
+  // Update selectedPanelId when initialSelectedPanel changes
+  useEffect(() => {
+    if (initialSelectedPanel?.id) {
+      setSelectedPanelId(initialSelectedPanel.id);
+    }
+  }, [initialSelectedPanel]);
+
+  // Update totalPanels when initialTotalPanels changes
+  useEffect(() => {
+    setTotalPanels(initialTotalPanels);
+  }, [initialTotalPanels]);
+
+  // Update strings when initialStrings changes
+  useEffect(() => {
+    setStrings(initialStrings);
+  }, [initialStrings]);
 
   useEffect(() => {
     const selectedPanel = panels.find(panel => panel.id === selectedPanelId) || null;
