@@ -36,8 +36,7 @@ const SolarCalculator = () => {
   const [activeMenu, setActiveMenu] = useState<string>("input");
   const [customInverters, setCustomInverters] = useState(defaultInverters);
 
-  // --- KHÔNG RESET STATE KHI CHUYỂN TAB, giữ nguyên state khi quay lại nhập liệu ---
-
+  // Tính toán lại dữ liệu khi thay đổi panel hoặc số lượng tấm (nhưng KHÔNG reset khi chuyển tab)
   useEffect(() => {
     if (selectedPanel && totalPanels > 0) {
       const power = calculateTotalPower(selectedPanel.power, totalPanels);
@@ -61,11 +60,12 @@ const SolarCalculator = () => {
     }
   }, [selectedPanel, totalPanels, customInverters]);
 
-  // Disable trạng thái cho nút
+  // Chặn chuyển sang các tab chưa đủ điều kiện
   const isInputCompleted = !!selectedPanel && totalPanels > 0;
   const isOutputAvailable = isInputCompleted;
   const isWiringAvailable = inverterCombination !== null && inverterCombination.totalPower > 0;
 
+  // ----------- SIDEBAR UI UPGRADE -----------
   return (
     <div className="container mx-auto py-6 max-w-5xl">
       <div className="text-center mb-6">
@@ -78,36 +78,56 @@ const SolarCalculator = () => {
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Sidebar menu với giao diện đẹp hơn */}
-        <ul className="flex flex-col md:w-56 w-full justify-start bg-transparent">
-          {MENU_LIST.map((item, idx) => {
-            let disabled = false;
-            if (item.key === "output") disabled = !isOutputAvailable;
-            if (item.key === "wiring") disabled = !isWiringAvailable;
+        {/* Sidebar menu đẹp hơn, spacing chặt chẽ hơn, active rõ hơn */}
+        <nav aria-label="Main" className="md:w-56 w-full">
+          <ul className="flex flex-col gap-0">
+            {MENU_LIST.map((item, idx) => {
+              let disabled = false;
+              if (item.key === "output") disabled = !isOutputAvailable;
+              if (item.key === "wiring") disabled = !isWiringAvailable;
 
-            // Tạo khoảng cách sát hơn, loại bỏ gap lớn
-            return (
-              <li key={item.key} className={idx !== MENU_LIST.length - 1 ? "mb-2" : ""}>
-                <button
-                  className={[
-                    "w-full flex items-center gap-2 px-4 py-2 rounded-lg text-left font-medium transition bg-gray-50",
-                    activeMenu === item.key
-                      ? "bg-blue-600 text-white shadow animate-fade-in"
-                      : "bg-gray-100 text-gray-800 hover:bg-blue-50 hover:scale-105",
-                    disabled ? "opacity-50 pointer-events-none" : "cursor-pointer"
-                  ].join(" ")}
-                  style={{ minHeight: 44, transition: 'all 0.16s ease' }}
-                  onClick={() => setActiveMenu(item.key)}
-                  disabled={disabled}
-                  type="button"
-                >
-                  <item.icon size={20} className={activeMenu === item.key ? "text-white" : "text-blue-600"} />
-                  <span className="ml-1">{item.label}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+              const isActive = activeMenu === item.key;
+
+              return (
+                <li key={item.key} className={idx !== MENU_LIST.length - 1 ? "mb-[1px]" : ""}>
+                  <button
+                    className={[
+                      "w-full flex items-center px-3 py-2 rounded-md font-medium transition-all duration-150 select-none",
+                      isActive
+                        ? "bg-primary/10 text-primary font-bold shadow-sm"
+                        : "bg-transparent text-gray-700 hover:bg-primary/5 hover:text-primary",
+                      disabled
+                        ? "opacity-40 pointer-events-none"
+                        : "cursor-pointer hover:scale-[1.03]",
+                    ].join(" ")}
+                    style={{ minHeight: 42 }}
+                    onClick={() => setActiveMenu(item.key)}
+                    disabled={disabled}
+                    type="button"
+                  >
+                    <item.icon
+                      size={20}
+                      className={[
+                        "mr-2 transition-colors duration-150",
+                        isActive
+                          ? "text-primary"
+                          : "text-gray-400 group-hover:text-primary"
+                      ].join(" ")}
+                    />
+                    <span
+                      className={isActive ? "font-bold" : ""}
+                      style={{
+                        letterSpacing: ".01em"
+                      }}
+                    >
+                      {item.label}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
         {/* Content section */}
         <div className="flex-1 bg-white rounded shadow py-6 px-3 md:px-6 min-h-[375px]">
@@ -118,12 +138,13 @@ const SolarCalculator = () => {
                 onTotalPanelsChange={setTotalPanels}
                 onStringsChange={setStrings}
                 onPanelsPerStringChange={setPanelsPerString}
+                // Đảm bảo truyền đủ props, giữ lại state đã chọn
               />
               {/* Nút sang output nếu nhập đủ */}
               {isInputCompleted && (
                 <div className="mt-4 text-right">
                   <button
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
                     onClick={() => setActiveMenu("output")}
                     type="button"
                   >
@@ -152,7 +173,7 @@ const SolarCalculator = () => {
                     Quay lại
                   </button>
                   <button
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
                     onClick={() => setActiveMenu("wiring")}
                     type="button"
                   >
