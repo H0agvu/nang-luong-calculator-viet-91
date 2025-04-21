@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { SolarPanel, inverters as defaultInverters } from "@/data/solarData";
 import PanelSelection from "./PanelSelection";
@@ -36,7 +35,6 @@ const SolarCalculator = () => {
   const [activeMenu, setActiveMenu] = useState<string>("input");
   const [customInverters, setCustomInverters] = useState(defaultInverters);
 
-  // Tính toán lại dữ liệu khi thay đổi panel hoặc số lượng tấm (nhưng KHÔNG reset khi chuyển tab)
   useEffect(() => {
     if (selectedPanel && totalPanels > 0) {
       const power = calculateTotalPower(selectedPanel.power, totalPanels);
@@ -60,12 +58,14 @@ const SolarCalculator = () => {
     }
   }, [selectedPanel, totalPanels, customInverters]);
 
-  // Chặn chuyển sang các tab chưa đủ điều kiện
   const isInputCompleted = !!selectedPanel && totalPanels > 0;
   const isOutputAvailable = isInputCompleted;
   const isWiringAvailable = inverterCombination !== null && inverterCombination.totalPower > 0;
 
-  // ----------- SIDEBAR UI UPGRADE -----------
+  const handleMenuClick = (menuKey: string) => {
+    setActiveMenu(menuKey);
+  };
+
   return (
     <div className="container mx-auto py-6 max-w-5xl">
       <div className="text-center mb-6">
@@ -78,7 +78,6 @@ const SolarCalculator = () => {
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Sidebar menu đẹp hơn, spacing chặt chẽ hơn, active rõ hơn */}
         <nav aria-label="Main" className="md:w-56 w-full">
           <ul className="flex flex-col gap-0">
             {MENU_LIST.map((item, idx) => {
@@ -101,7 +100,7 @@ const SolarCalculator = () => {
                         : "cursor-pointer hover:scale-[1.03]",
                     ].join(" ")}
                     style={{ minHeight: 42 }}
-                    onClick={() => setActiveMenu(item.key)}
+                    onClick={() => handleMenuClick(item.key)}
                     disabled={disabled}
                     type="button"
                   >
@@ -115,7 +114,7 @@ const SolarCalculator = () => {
                       ].join(" ")}
                     />
                     <span
-                      className={isActive ? "font-bold" : ""}
+                      className={isActive ? "font-bold text-primary" : ""}
                       style={{
                         letterSpacing: ".01em"
                       }}
@@ -129,7 +128,6 @@ const SolarCalculator = () => {
           </ul>
         </nav>
 
-        {/* Content section */}
         <div className="flex-1 bg-white rounded shadow py-6 px-3 md:px-6 min-h-[375px]">
           {activeMenu === "input" && (
             <div>
@@ -138,14 +136,16 @@ const SolarCalculator = () => {
                 onTotalPanelsChange={setTotalPanels}
                 onStringsChange={setStrings}
                 onPanelsPerStringChange={setPanelsPerString}
-                // Đảm bảo truyền đủ props, giữ lại state đã chọn
+                selectedPanel={selectedPanel}
+                totalPanels={totalPanels}
+                strings={strings}
+                panelsPerString={panelsPerString}
               />
-              {/* Nút sang output nếu nhập đủ */}
               {isInputCompleted && (
                 <div className="mt-4 text-right">
                   <button
                     className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
-                    onClick={() => setActiveMenu("output")}
+                    onClick={() => handleMenuClick("output")}
                     type="button"
                   >
                     Xem kết quả
@@ -167,14 +167,14 @@ const SolarCalculator = () => {
                 <div className="mt-4 flex justify-between">
                   <button
                     className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
-                    onClick={() => setActiveMenu("input")}
+                    onClick={() => handleMenuClick("input")}
                     type="button"
                   >
                     Quay lại
                   </button>
                   <button
                     className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
-                    onClick={() => setActiveMenu("wiring")}
+                    onClick={() => handleMenuClick("wiring")}
                     type="button"
                   >
                     Tính dây và MCCB
@@ -190,7 +190,7 @@ const SolarCalculator = () => {
               <div className="mt-4 text-left">
                 <button
                   className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
-                  onClick={() => setActiveMenu("output")}
+                  onClick={() => handleMenuClick("output")}
                   type="button"
                 >
                   Quay lại kết quả
