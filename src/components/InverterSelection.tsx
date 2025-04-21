@@ -1,3 +1,4 @@
+
 import { InverterCombination } from "@/utils/solarCalculations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -7,6 +8,7 @@ interface InverterSelectionProps {
   inverterPower: number;
   inverterCombination: InverterCombination | null;
   dcAcRatio: number;
+  strings: number; // nhận tổng số lượng string từ props
 }
 
 const InverterSelection = ({
@@ -14,9 +16,20 @@ const InverterSelection = ({
   inverterPower,
   inverterCombination,
   dcAcRatio,
+  strings,
 }: InverterSelectionProps) => {
   // Kiểm tra tỷ lệ DC/AC có nằm trong khoảng hợp lệ không
   const isValidRatio = dcAcRatio >= 1.05 && dcAcRatio <= 1.21;
+
+  // Tính tổng số MPPT có được từ tổ hợp inverter
+  const totalMppt =
+    inverterCombination?.inverters.reduce(
+      (sum, item) => sum + (item.inverter.mpptCount ?? 0) * item.count,
+      0
+    ) || 0;
+
+  // So sánh tổng số string với tổng số mppt
+  const isStringOverMppt = strings > totalMppt;
 
   return (
     <Card className="w-full">
@@ -73,7 +86,32 @@ const InverterSelection = ({
                 </div>
               </div>
             </div>
-
+            {/* THÔNG SỐ MPPT */}
+            <div className="pt-2">
+              <div className="text-lg font-medium mb-2">Tổng số cổng MPPT</div>
+              <div className="flex items-center gap-2 text-2xl font-bold mb-1">
+                {totalMppt}
+                <span className="text-base font-medium text-gray-500">
+                  cổng
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Số string yêu cầu</span>
+                <span
+                  className={
+                    isStringOverMppt
+                      ? "text-red-600 font-bold"
+                      : "text-green-600 font-semibold"
+                  }
+                >
+                  {strings}{" "}
+                  {isStringOverMppt
+                    ? "(VƯỢT số cổng MPPT! Chia lại hoặc tối ưu thiết kế)"
+                    : "≤ tổng MPPT (Hợp lệ)"}
+                </span>
+              </div>
+            </div>
+            {/* DC/AC Ratio */}
             <div className="pt-2">
               <div className="text-lg font-medium mb-2">Tỷ số DC/AC</div>
               <div className={`text-2xl font-bold mb-1 ${isValidRatio ? "" : "text-red-600"}`}>
@@ -104,3 +142,4 @@ const InverterSelection = ({
 };
 
 export default InverterSelection;
+

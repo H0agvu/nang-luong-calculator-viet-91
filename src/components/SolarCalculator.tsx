@@ -223,6 +223,7 @@ const SolarCalculator = () => {
                 inverterPower={inverterPower}
                 inverterCombination={inverterCombination}
                 dcAcRatio={dcAcRatio}
+                strings={strings}
               />
               {inverterCombination && (
                 <div className="mt-4 flex justify-between">
