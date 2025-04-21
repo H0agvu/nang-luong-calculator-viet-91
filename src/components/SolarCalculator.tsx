@@ -5,6 +5,7 @@ import PanelSelection from "./PanelSelection";
 import InverterSelection from "./InverterSelection";
 import WiringCalculator from "./WiringCalculator";
 import InverterDataInput from "./InverterDataInput";
+import InverterList from "./InverterList";
 import { 
   calculateTotalPower, 
   calculateInverterPower, 
@@ -74,10 +75,11 @@ const SolarCalculator = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 mb-4">
+        <TabsList className="grid grid-cols-4 mb-4">
           <TabsTrigger value="input">Nhập liệu</TabsTrigger>
           <TabsTrigger value="output">Kết quả Inverter</TabsTrigger>
           <TabsTrigger value="wiring" disabled={!inverterCombination}>Tính dây và MCCB</TabsTrigger>
+          <TabsTrigger value="inverter-list">Danh sách inverter</TabsTrigger>
         </TabsList>
         
         <TabsContent value="input">
@@ -138,6 +140,12 @@ const SolarCalculator = () => {
               Quay lại kết quả
             </button>
           </div>
+        </TabsContent>
+
+        <TabsContent value="inverter-list">
+          <InverterList
+            inverters={customInverters}
+          />
         </TabsContent>
       </Tabs>
     </div>
