@@ -13,12 +13,13 @@ import {
   calculateDCACRatio,
   InverterCombination
 } from "@/utils/solarCalculations";
+import { Settings, Calculator, List, SlidersHorizontal } from "lucide-react";
 
 const MENU_LIST = [
-  { key: "input", label: "Nhập liệu" },
-  { key: "output", label: "Kết quả Inverter" },
-  { key: "wiring", label: "Tính dây và MCCB" },
-  { key: "inverter-list", label: "Danh sách inverter" },
+  { key: "input", label: "Nhập liệu", icon: Calculator },
+  { key: "output", label: "Kết quả Inverter", icon: SlidersHorizontal },
+  { key: "wiring", label: "Tính dây và MCCB", icon: Settings },
+  { key: "inverter-list", label: "Danh sách inverter", icon: List },
 ];
 
 const SolarCalculator = () => {
@@ -34,6 +35,8 @@ const SolarCalculator = () => {
 
   const [activeMenu, setActiveMenu] = useState<string>("input");
   const [customInverters, setCustomInverters] = useState(defaultInverters);
+
+  // --- KHÔNG RESET STATE KHI CHUYỂN TAB, giữ nguyên state khi quay lại nhập liệu ---
 
   useEffect(() => {
     if (selectedPanel && totalPanels > 0) {
@@ -58,7 +61,7 @@ const SolarCalculator = () => {
     }
   }, [selectedPanel, totalPanels, customInverters]);
 
-  // Disable "output" unless đã nhập liệu xong, "wiring" trừ khi có inverterCombination
+  // Disable trạng thái cho nút
   const isInputCompleted = !!selectedPanel && totalPanels > 0;
   const isOutputAvailable = isInputCompleted;
   const isWiringAvailable = inverterCombination !== null && inverterCombination.totalPower > 0;
@@ -75,28 +78,31 @@ const SolarCalculator = () => {
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Sidebar menu */}
-        <ul className="flex md:flex-col gap-2 md:w-64 w-full justify-between">
-          {MENU_LIST.map(item => {
+        {/* Sidebar menu với giao diện đẹp hơn */}
+        <ul className="flex flex-col md:w-56 w-full justify-start bg-transparent">
+          {MENU_LIST.map((item, idx) => {
             let disabled = false;
             if (item.key === "output") disabled = !isOutputAvailable;
             if (item.key === "wiring") disabled = !isWiringAvailable;
 
+            // Tạo khoảng cách sát hơn, loại bỏ gap lớn
             return (
-              <li key={item.key}>
+              <li key={item.key} className={idx !== MENU_LIST.length - 1 ? "mb-2" : ""}>
                 <button
                   className={[
-                    "w-full px-4 py-2 rounded text-left font-medium transition",
+                    "w-full flex items-center gap-2 px-4 py-2 rounded-lg text-left font-medium transition bg-gray-50",
                     activeMenu === item.key
-                      ? "bg-blue-600 text-white shadow"
-                      : "bg-gray-100 text-gray-800 hover:bg-gray-200",
-                    disabled ? "opacity-50 pointer-events-none" : ""
+                      ? "bg-blue-600 text-white shadow animate-fade-in"
+                      : "bg-gray-100 text-gray-800 hover:bg-blue-50 hover:scale-105",
+                    disabled ? "opacity-50 pointer-events-none" : "cursor-pointer"
                   ].join(" ")}
+                  style={{ minHeight: 44, transition: 'all 0.16s ease' }}
                   onClick={() => setActiveMenu(item.key)}
                   disabled={disabled}
                   type="button"
                 >
-                  {item.label}
+                  <item.icon size={20} className={activeMenu === item.key ? "text-white" : "text-blue-600"} />
+                  <span className="ml-1">{item.label}</span>
                 </button>
               </li>
             );
