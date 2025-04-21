@@ -2,7 +2,8 @@
 import { FC, useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SolarPanel, Inverter } from "@/data/solarData";
+import { Inverter } from "@/interfaces/inverter";
+import { SolarPanel } from "@/interfaces/solarPanel";
 import { toast } from "@/components/ui/use-toast";
 import { FileDown, FileUp, Database } from "lucide-react";
 

@@ -93,7 +93,6 @@ const SolarCalculator = () => {
 
   const handleImportData = (data: any) => {
     if (data.inverters && data.inverters.length > 0) {
-      // Cập nhật danh sách inverter
       const formattedInverters: Inverter[] = data.inverters.map((inv: any) => ({
         id: inv.id || `${inv.name}-${inv.power}`,
         name: inv.name,
@@ -105,7 +104,6 @@ const SolarCalculator = () => {
     }
 
     if (data.history && data.history.length > 0) {
-      // Cập nhật lịch sử
       setCalcHistory(data.history);
     }
   };
