@@ -4,7 +4,8 @@ import { Inverter } from "@/data/solarData";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ListCheck, LayoutList, Edit, Trash2 } from "lucide-react";
+import { LayoutList } from "lucide-react";
+import InverterTabs from "./InverterTabs";
 
 const defaultInverter = {
   id: "",
@@ -123,67 +124,17 @@ const InverterDataInput = ({ value, onChange }: InverterDataInputProps) => {
             )}
           </div>
         </form>
-
+        {/* Thay bảng bằng tab inverter */}
         <div>
           <div className="font-semibold mb-2 flex gap-2 items-center">
-            <ListCheck className="w-4 h-4 text-green-600" />
+            <LayoutList className="w-4 h-4 text-green-600" />
             Danh sách inverter
           </div>
-          <div className="overflow-x-auto bg-white rounded shadow-sm border">
-            <table className="min-w-full table-auto text-sm [&>thead>tr]:bg-blue-50 [&>thead>tr]:text-blue-800 animate-fade-in">
-              <thead>
-                <tr>
-                  <th className="py-2 px-3 font-semibold">#</th>
-                  <th className="py-2 px-3 font-semibold text-left">Tên inverter</th>
-                  <th className="py-2 px-3 font-semibold">Công suất (kW)</th>
-                  <th className="py-2 px-3 font-semibold">Hiệu suất (%)</th>
-                  <th className="py-2 px-3 font-semibold">MPPT</th>
-                  <th className="py-2 px-3 font-semibold">Hành động</th>
-                </tr>
-              </thead>
-              <tbody>
-                {inverters.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="text-center text-gray-500 py-3">
-                      Chưa có dữ liệu inverter nào
-                    </td>
-                  </tr>
-                )}
-                {inverters.map((inv, idx) => (
-                  <tr
-                    key={inv.id}
-                    className="border-t hover:bg-blue-50 transition animate-fade-in"
-                  >
-                    <td className="py-2 px-3 text-center">{idx + 1}</td>
-                    <td className="py-2 px-3 font-medium">{inv.name}</td>
-                    <td className="py-2 px-3 text-center">{inv.power}</td>
-                    <td className="py-2 px-3 text-center">{inv.efficiency}%</td>
-                    <td className="py-2 px-3 text-center">{inv.mpptCount}</td>
-                    <td className="py-2 px-3 flex gap-3 justify-center">
-                      <button
-                        className="hover-scale text-blue-600"
-                        title="Sửa"
-                        onClick={() => startEdit(idx)}
-                        type="button"
-                        aria-label="Sửa inverter"
-                      >
-                        <Edit className="w-5 h-5" />
-                      </button>
-                      <button
-                        className="hover-scale text-red-600"
-                        title="Xoá"
-                        onClick={() => removeInverter(idx)}
-                        type="button"
-                        aria-label="Xoá inverter"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <InverterTabs 
+            inverters={inverters}
+            onEdit={startEdit}
+            onDelete={removeInverter}
+          />
         </div>
       </CardContent>
     </Card>
