@@ -346,7 +346,7 @@ const WiringCalculator = ({ inverterCombination }) => {
                   <div className="border p-4 rounded-md shadow-sm">
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <span className="text-gray-600">Tổng công suất:</span> {totalWiring.power.toFixed(2)} kW
+                        <span className="text-gray-600">Tổng công suất:</span> {totalWiring.power.toFixed(0)} kW
                       </div>
                       <div>
                         <span className="text-gray-600">Điện áp:</span> {totalWiring.voltage} V

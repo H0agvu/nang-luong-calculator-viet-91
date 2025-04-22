@@ -1,4 +1,3 @@
-
 import { Inverter, cableSizes, standardMCCBRatings } from "@/data/solarData";
 
 export interface InverterCombination {
@@ -257,11 +256,14 @@ export const findSuitableCable = (
     
     // Nếu dòng điện phù hợp thì dừng lại
     if (cableCurrent >= current && cableCurrent > 0) {
+      // Thay đổi: sử dụng cùng kích thước cho dây trung tính đối với cáp nhỏ
+      const neutralSize = cable.size <= 10 ? cable.size : getNeutralSize(cable.size);
+
       return {
-        type: `0.6/1kV-CU/${insulationType}/PVC-${phase === "3P" ? "3x" : "2x"}${cable.size}+1x${getNeutralSize(cable.size)}mm²`,
+        type: `0.6/1kV-CU/${insulationType}/PVC-${phase === "3P" ? "3x" : "2x"}${cable.size}+1x${neutralSize}mm²`,
         count: 1,
         mainCableSize: cable.size,
-        neutralCableSize: getNeutralSize(cable.size)
+        neutralCableSize: neutralSize
       };
     }
   }
@@ -301,30 +303,48 @@ export const findSuitableCable = (
       }
     }
     
+    // Thay đổi: sử dụng cùng kích thước cho dây trung tính đối với cáp nhỏ
+    const neutralSize = selectedSize <= 10 ? selectedSize : getNeutralSize(selectedSize);
+
     return {
-      type: `0.6/1kV-CU/${insulationType}/PVC-${count}x(${phase === "3P" ? "3x" : "2x"}${selectedSize}+1x${getNeutralSize(selectedSize)}mm²)`,
+      type: `0.6/1kV-CU/${insulationType}/PVC-${count}x(${phase === "3P" ? "3x" : "2x"}${selectedSize}+1x${neutralSize}mm²)`,
       count,
       mainCableSize: selectedSize,
-      neutralCableSize: getNeutralSize(selectedSize)
+      neutralCableSize: neutralSize
     };
   }
   
   // Mặc định trả về cáp lớn nhất nếu không tìm được cáp phù hợp
+  // Thay đổi: sử dụng cùng kích thước cho dây trung tính đối với cáp nhỏ
+  const neutralSize = maxCableSize <= 10 ? maxCableSize : getNeutralSize(maxCableSize);
+
   return {
-    type: `0.6/1kV-CU/${insulationType}/PVC-${phase === "3P" ? "3x" : "2x"}${maxCableSize}+1x${getNeutralSize(maxCableSize)}mm²`,
+    type: `0.6/1kV-CU/${insulationType}/PVC-${phase === "3P" ? "3x" : "2x"}${maxCableSize}+1x${neutralSize}mm²`,
     count: 1,
     mainCableSize: maxCableSize,
-    neutralCableSize: getNeutralSize(maxCableSize)
+    neutralCableSize: neutralSize
   };
 };
 
 // Hàm tính kích thước dây trung tính
 const getNeutralSize = (mainSize: number): number => {
-  const halfSize = mainSize / 2;
+  // Với dây có tiết diện <= 10mm², dùng cùng kích thước
+  if (mainSize <= 10) {
+    return mainSize;
+  }
+  
+  // Với dây lớn hơn, dùng nửa kích thước nhưng không nhỏ hơn 10mm²
+  const halfSize = Math.max(mainSize / 2, 10);
   
   // Tìm kích thước tiêu chuẩn gần với nửa kích thước cáp chính
   const standardSizes = cableSizes.map(cable => cable.size);
   
-  // Tìm kích thước lớn hơn hoặc bằng gần nhất
-  return standardSizes.find(size => size >= halfSize) || mainSize;
+  // Tìm kích thước nhỏ hơn hoặc bằng gần nhất
+  for (let i = standardSizes.length - 1; i >= 0; i--) {
+    if (standardSizes[i] <= halfSize) {
+      return standardSizes[i];
+    }
+  }
+  
+  return standardSizes[0] || mainSize;
 };
