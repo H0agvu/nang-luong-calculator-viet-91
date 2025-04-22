@@ -6,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import {
   calculateCurrent, findSuitableMCCB, findSuitableCable
 } from "@/utils/solarCalculations";
@@ -31,66 +32,84 @@ const WiringCalculator = ({ inverterCombination }) => {
 
     let detectedHighCurrent = false;
 
-    // Tính cho từng inverter đơn lẻ
-    const wiringResults = inverterCombination.inverters.map(item => {
-      const { inverter, count } = item;
-      const voltage = singlePhaseType === "1P" ? 220 : 380;
-      const current = calculateCurrent(inverter.power, voltage, singlePhaseType, inverter.efficiency);
-      const mccbRating = findSuitableMCCB(current * 1.25);
-      const cable = findSuitableCable(
-        current,
-        singlePhaseType,
-        singleCoreType,
-        singleInsulationType,
-        singleInstallationType
-      );
+    try {
+      // Tính cho từng inverter đơn lẻ
+      const wiringResults = inverterCombination.inverters.map(item => {
+        const { inverter, count } = item;
+        const voltage = singlePhaseType === "1P" ? 220 : 380;
+        const current = calculateCurrent(inverter.power, voltage, singlePhaseType, inverter.efficiency);
+        const mccbRating = findSuitableMCCB(current * 1.25);
+        const cable = findSuitableCable(
+          current,
+          singlePhaseType,
+          singleCoreType,
+          singleInsulationType,
+          singleInstallationType
+        );
 
-      if (cable.count > 1) {
-        detectedHighCurrent = true;
+        if (cable.count > 1) {
+          detectedHighCurrent = true;
+        }
+
+        return {
+          inverter,
+          count,
+          phaseType: singlePhaseType,
+          voltage,
+          current: current.toFixed(2),
+          mccbRating,
+          cable
+        };
+      });
+
+      setInverterWiring(wiringResults);
+
+      // Tính toán cho tủ tổng
+      if (wiringResults.length > 0) {
+        const totalPower = inverterCombination.totalPower;
+        const voltage = totalPhaseType === "1P" ? 220 : 380;
+        const current = calculateCurrent(totalPower, voltage, totalPhaseType, 99); // Giả định hiệu suất 99%
+        const mccbRating = findSuitableMCCB(current * 1.25);
+        const cable = findSuitableCable(
+          current,
+          totalPhaseType,
+          totalCoreType,
+          totalInsulationType,
+          totalInstallationType
+        );
+
+        if (cable.count > 1) {
+          detectedHighCurrent = true;
+        }
+
+        setTotalWiring({
+          power: totalPower,
+          voltage,
+          current: current.toFixed(2),
+          mccbRating,
+          cable
+        });
       }
 
-      return {
-        inverter,
-        count,
-        phaseType: singlePhaseType,
-        voltage,
-        current: current.toFixed(2),
-        mccbRating,
-        cable
-      };
-    });
-
-    setInverterWiring(wiringResults);
-
-    // Tính toán cho tủ tổng
-    if (wiringResults.length > 0) {
-      const totalPower = inverterCombination.totalPower;
-      const voltage = totalPhaseType === "1P" ? 220 : 380;
-      const current = calculateCurrent(totalPower, voltage, totalPhaseType, 99); // Giả định hiệu suất 99%
-      const mccbRating = findSuitableMCCB(current * 1.25);
-      const cable = findSuitableCable(
-        current,
-        totalPhaseType,
-        totalCoreType,
-        totalInsulationType,
-        totalInstallationType
-      );
-
-      if (cable.count > 1) {
-        detectedHighCurrent = true;
+      setHasHighCurrent(detectedHighCurrent);
+      
+      // Show success toast if all calculations were completed
+      if (wiringResults.length > 0) {
+        toast({
+          title: "Tính toán thành công",
+          description: "Đã hoàn thành tính toán dây và MCCB",
+          duration: 3000,
+        });
       }
-
-      setTotalWiring({
-        power: totalPower,
-        voltage,
-        current: current.toFixed(2),
-        mccbRating,
-        cable
+    } catch (error) {
+      console.error("Lỗi khi tính toán:", error);
+      toast({
+        variant: "destructive",
+        title: "Lỗi tính toán",
+        description: "Có lỗi xảy ra khi tính toán dây và MCCB",
+        duration: 5000,
       });
     }
-
-    setHasHighCurrent(detectedHighCurrent);
-    // eslint-disable-next-line
   }, [
     inverterCombination,
     singlePhaseType,
@@ -290,7 +309,7 @@ const WiringCalculator = ({ inverterCombination }) => {
                 <h3 className="font-semibold text-lg mb-3">Thông số Inverter đơn lẻ</h3>
                 <div className="space-y-4">
                   {inverterWiring.map((item, index) => (
-                    <div key={index} className="border p-4 rounded-md">
+                    <div key={index} className="border p-4 rounded-md shadow-sm">
                       <div className="font-medium text-lg mb-2">
                         {item.inverter.name} ({item.count} cái)
                       </div>
@@ -324,10 +343,10 @@ const WiringCalculator = ({ inverterCombination }) => {
               {totalWiring && (
                 <div>
                   <h3 className="font-semibold text-lg mb-3">Thông số tủ tổng</h3>
-                  <div className="border p-4 rounded-md">
+                  <div className="border p-4 rounded-md shadow-sm">
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <span className="text-gray-600">Tổng công suất:</span> {totalWiring.power} kW
+                        <span className="text-gray-600">Tổng công suất:</span> {totalWiring.power.toFixed(2)} kW
                       </div>
                       <div>
                         <span className="text-gray-600">Điện áp:</span> {totalWiring.voltage} V
