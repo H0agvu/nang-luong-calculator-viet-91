@@ -42,7 +42,7 @@ const WiringCalculator = ({ inverterCombination }) => {
         const cable = findSuitableCable(
           current,
           singlePhaseType,
-          singleCoreType,
+          singleCoreType === "single" ? "single" : "multi",
           singleInsulationType,
           singleInstallationType
         );
@@ -73,7 +73,7 @@ const WiringCalculator = ({ inverterCombination }) => {
         const cable = findSuitableCable(
           current,
           totalPhaseType,
-          totalCoreType,
+          totalCoreType === "single" ? "single" : "multi",
           totalInsulationType,
           totalInstallationType
         );
