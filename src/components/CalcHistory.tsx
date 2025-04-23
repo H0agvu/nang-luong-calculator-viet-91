@@ -36,7 +36,13 @@ const CalcHistory = ({ history, onExport }: CalcHistoryProps) => {
       <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
         <CardTitle>Lịch sử tính toán</CardTitle>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" title="Xuất Excel" onClick={handleExport} disabled={history.length === 0}>
+          <Button
+            variant="outline"
+            size="sm"
+            title="Xuất Excel"
+            onClick={handleExport}
+            disabled={history.length === 0}
+          >
             <FileSpreadsheet className="mr-2" /> Xuất
           </Button>
         </div>
@@ -66,10 +72,20 @@ const CalcHistory = ({ history, onExport }: CalcHistoryProps) => {
                     <TableCell className="text-center">{item.totalPanels}</TableCell>
                     <TableCell>{item.inverterResult}</TableCell>
                     <TableCell className="text-center">
-                      {item.dcAcRatio?.toFixed(2) ?? ""}
+                      {item.dcAcRatio !== undefined && item.dcAcRatio !== null
+                        ? item.dcAcRatio.toFixed(2)
+                        : ""}
                     </TableCell>
-                    <TableCell>{item.inverterWireSummary || "-"}</TableCell>
-                    <TableCell>{item.mainWireSummary || "-"}</TableCell>
+                    <TableCell>
+                      {item.inverterWireSummary && item.inverterWireSummary.trim() !== ""
+                        ? item.inverterWireSummary
+                        : "-"}
+                    </TableCell>
+                    <TableCell>
+                      {item.mainWireSummary && item.mainWireSummary.trim() !== ""
+                        ? item.mainWireSummary
+                        : "-"}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
