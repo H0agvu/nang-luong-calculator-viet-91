@@ -1,7 +1,7 @@
 
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileSpreadsheet, Save } from "lucide-react";
+import { FileSpreadsheet } from "lucide-react";
 import { exportHistoryToExcel } from "@/utils/exportExcel";
 
 interface CalcHistoryProps {
