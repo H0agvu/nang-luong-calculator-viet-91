@@ -14,6 +14,7 @@ import {
   InverterCombination
 } from "@/utils/solarCalculations";
 import { Settings, Calculator, List, SlidersHorizontal, History as HistoryIcon } from "lucide-react";
+import { Save } from "lucide-react";
 
 const MENU_LIST = [
   { key: "input", label: "Nhập liệu", icon: Calculator },
@@ -258,7 +259,7 @@ const SolarCalculator = () => {
                     onClick={handleSaveHistory}
                     type="button"
                   >
-                    <SaveIcon className="w-4 h-4" /> Lưu lại
+                    <Save className="w-4 h-4" /> Lưu lại
                   </button>
                 </div>
               )}
@@ -284,7 +285,7 @@ const SolarCalculator = () => {
                   onClick={handleSaveHistory}
                   type="button"
                 >
-                  <SaveIcon className="w-4 h-4" /> Lưu lại
+                  <Save className="w-4 h-4" /> Lưu lại
                 </button>
               </div>
             </div>
