@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { SolarPanel, inverters as defaultInverters } from "@/data/solarData";
 import PanelSelection from "./PanelSelection";
@@ -42,11 +43,18 @@ const SolarCalculator = () => {
       time: string;
       panelName: string;
       totalPanels: number;
-      strings: number;
       inverterResult: string;
       dcAcRatio: number;
+      inverterWireSummary?: string;
+      mainWireSummary?: string;
     }[]
   >([]);
+
+  // Store latest wiring/MCCB result for history
+  const [lastWiring, setLastWiring] = useState<{
+    inverterWireSummary: string | null;
+    mainWireSummary: string | null;
+  }>({ inverterWireSummary: null, mainWireSummary: null });
 
   const [inputSnapshot, setInputSnapshot] = useState<{
     selectedPanel: SolarPanel | null;
@@ -87,6 +95,11 @@ const SolarCalculator = () => {
     }
   }, [selectedPanel, totalPanels, customInverters]);
 
+  // Capture wire + MCCB selection summary from WiringCalculator
+  const handleWiringSave = (inverterWireSummary: string, mainWireSummary: string) => {
+    setLastWiring({ inverterWireSummary, mainWireSummary });
+  };
+
   const isInputCompleted = !!selectedPanel && totalPanels > 0;
   const isOutputAvailable = isInputCompleted;
   const isWiringAvailable = inverterCombination !== null && inverterCombination.totalPower > 0;
@@ -103,6 +116,7 @@ const SolarCalculator = () => {
     setActiveMenu(menuKey);
   };
 
+  // Lưu kết quả vào lịch sử
   const handleSaveHistory = () => {
     if (!selectedPanel || !inverterCombination) return;
     const inverterSummary = inverterCombination.inverters
@@ -116,13 +130,17 @@ const SolarCalculator = () => {
         time: new Date().toLocaleString("vi-VN"),
         panelName: selectedPanel.name,
         totalPanels,
-        strings,
         inverterResult: inverterSummary,
         dcAcRatio,
+        inverterWireSummary: lastWiring.inverterWireSummary ?? "",
+        mainWireSummary: lastWiring.mainWireSummary ?? "",
       },
       ...prev,
     ]);
   };
+
+  // Thêm nút "Lưu lại" trong output và wiring để lưu thủ công
+  // Truyền thêm callback xuống WiringCalculator để lấy tóm tắt từ wiring/MCCB
 
   return (
     <div className="container mx-auto py-6 max-w-5xl">
@@ -204,7 +222,7 @@ const SolarCalculator = () => {
                   <button
                     className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
                     onClick={() => {
-                      handleSaveHistory();
+                      // Không lưu vào lịch sử ở đây, chỉ chuyển sang output
                       handleMenuClick("output");
                     }}
                     type="button"
@@ -226,20 +244,29 @@ const SolarCalculator = () => {
                 strings={strings}
               />
               {inverterCombination && (
-                <div className="mt-4 flex justify-between">
+                <div className="mt-4 flex flex-wrap gap-2 justify-between items-center">
+                  <div className="flex gap-2">
+                    <button
+                      className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
+                      onClick={() => handleMenuClick("input")}
+                      type="button"
+                    >
+                      Quay lại
+                    </button>
+                    <button
+                      className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
+                      onClick={() => handleMenuClick("wiring")}
+                      type="button"
+                    >
+                      Tính dây và MCCB
+                    </button>
+                  </div>
                   <button
-                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
-                    onClick={() => handleMenuClick("input")}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                    onClick={handleSaveHistory}
                     type="button"
                   >
-                    Quay lại
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
-                    onClick={() => handleMenuClick("wiring")}
-                    type="button"
-                  >
-                    Tính dây và MCCB
+                    <Save className="w-4 h-4" /> Lưu lại
                   </button>
                 </div>
               )}
@@ -248,14 +275,24 @@ const SolarCalculator = () => {
 
           {activeMenu === "wiring" && (
             <div>
-              <WiringCalculator inverterCombination={inverterCombination} />
-              <div className="mt-4 text-left">
+              <WiringCalculator
+                inverterCombination={inverterCombination}
+                onWireSave={handleWiringSave}
+              />
+              <div className="mt-4 flex flex-wrap gap-2 items-center">
                 <button
                   className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
                   onClick={() => handleMenuClick("output")}
                   type="button"
                 >
                   Quay lại kết quả
+                </button>
+                <button
+                  className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                  onClick={handleSaveHistory}
+                  type="button"
+                >
+                  <Save className="w-4 h-4" /> Lưu lại
                 </button>
               </div>
             </div>
