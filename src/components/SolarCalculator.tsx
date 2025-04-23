@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { SolarPanel, inverters as defaultInverters } from "@/data/solarData";
 import PanelSelection from "./PanelSelection";
@@ -50,7 +49,6 @@ const SolarCalculator = () => {
     }[]
   >([]);
 
-  // Store latest wiring/MCCB result for history
   const [lastWiring, setLastWiring] = useState<{
     inverterWireSummary: string | null;
     mainWireSummary: string | null;
@@ -95,7 +93,6 @@ const SolarCalculator = () => {
     }
   }, [selectedPanel, totalPanels, customInverters]);
 
-  // Capture wire + MCCB selection summary from WiringCalculator
   const handleWiringSave = (inverterWireSummary: string, mainWireSummary: string) => {
     setLastWiring({ inverterWireSummary, mainWireSummary });
   };
@@ -116,7 +113,6 @@ const SolarCalculator = () => {
     setActiveMenu(menuKey);
   };
 
-  // Lưu kết quả vào lịch sử
   const handleSaveHistory = () => {
     if (!selectedPanel || !inverterCombination) return;
     const inverterSummary = inverterCombination.inverters
@@ -138,9 +134,6 @@ const SolarCalculator = () => {
       ...prev,
     ]);
   };
-
-  // Thêm nút "Lưu lại" trong output và wiring để lưu thủ công
-  // Truyền thêm callback xuống WiringCalculator để lấy tóm tắt từ wiring/MCCB
 
   return (
     <div className="container mx-auto py-6 max-w-5xl">
@@ -222,7 +215,6 @@ const SolarCalculator = () => {
                   <button
                     className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
                     onClick={() => {
-                      // Không lưu vào lịch sử ở đây, chỉ chuyển sang output
                       handleMenuClick("output");
                     }}
                     type="button"
@@ -266,7 +258,7 @@ const SolarCalculator = () => {
                     onClick={handleSaveHistory}
                     type="button"
                   >
-                    <Save className="w-4 h-4" /> Lưu lại
+                    <SaveIcon className="w-4 h-4" /> Lưu lại
                   </button>
                 </div>
               )}
@@ -292,7 +284,7 @@ const SolarCalculator = () => {
                   onClick={handleSaveHistory}
                   type="button"
                 >
-                  <Save className="w-4 h-4" /> Lưu lại
+                  <SaveIcon className="w-4 h-4" /> Lưu lại
                 </button>
               </div>
             </div>

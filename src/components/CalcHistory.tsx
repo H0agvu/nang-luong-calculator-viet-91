@@ -1,7 +1,7 @@
 
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileExcel, Save } from "lucide-react";
+import { FileSpreadsheet, Save } from "lucide-react";
 import { exportHistoryToExcel } from "@/utils/exportExcel";
 
 interface CalcHistoryProps {
@@ -29,7 +29,7 @@ const CalcHistory = ({ history, onExport }: CalcHistoryProps) => {
         <CardTitle>Lịch sử tính toán</CardTitle>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" title="Xuất Excel" onClick={handleExport} disabled={history.length === 0}>
-            <FileExcel className="mr-2" /> Xuất
+            <FileSpreadsheet className="mr-2" /> Xuất
           </Button>
         </div>
       </CardHeader>

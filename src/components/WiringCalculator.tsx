@@ -12,9 +12,10 @@ import {
 
 interface WiringCalculatorProps {
   inverterCombination: InverterCombination | null;
+  onWireSave?: (inverterWireSummary: string, mainWireSummary: string) => void;
 }
 
-const WiringCalculator = ({ inverterCombination }: WiringCalculatorProps) => {
+const WiringCalculator = ({ inverterCombination, onWireSave }: WiringCalculatorProps) => {
   // Thiết lập cho inverter đơn lẻ
   const [singlePhaseType, setSinglePhaseType] = useState<"1P" | "3P">("3P");
   const [singleCoreType, setSingleCoreType] = useState<"single" | "multi">("multi");
