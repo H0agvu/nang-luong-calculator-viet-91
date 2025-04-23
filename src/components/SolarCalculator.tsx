@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { SolarPanel, inverters as defaultInverters } from "@/data/solarData";
 import PanelSelection from "./PanelSelection";
@@ -104,18 +105,17 @@ const SolarCalculator = () => {
         )
         .join(" + ");
       
-      setCalcHistory((prev) => [
-        {
-          time: new Date().toLocaleString("vi-VN"),
-          panelName: selectedPanel.name,
-          totalPanels,
-          inverterResult: inverterSummary,
-          dcAcRatio,
-          inverterWireSummary: inverterWireSummary,
-          mainWireSummary: mainWireSummary,
-        },
-        ...prev,
-      ]);
+      const newHistoryItem = {
+        time: new Date().toLocaleString("vi-VN"),
+        panelName: selectedPanel.name,
+        totalPanels,
+        inverterResult: inverterSummary,
+        dcAcRatio,
+        inverterWireSummary: inverterWireSummary,
+        mainWireSummary: mainWireSummary,
+      };
+      
+      setCalcHistory((prev) => [newHistoryItem, ...prev]);
     }
   };
 

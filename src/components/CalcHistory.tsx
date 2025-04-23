@@ -3,6 +3,14 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileSpreadsheet } from "lucide-react";
 import { exportHistoryToExcel } from "@/utils/exportExcel";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 
 interface CalcHistoryProps {
   history: {
@@ -38,34 +46,34 @@ const CalcHistory = ({ history, onExport }: CalcHistoryProps) => {
           <div className="text-gray-500">Chưa có lịch sử.</div>
         ) : (
           <div className="overflow-auto max-w-full">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr>
-                  <th className="p-2 border-b">Thời gian</th>
-                  <th className="p-2 border-b">Tấm pin</th>
-                  <th className="p-2 border-b">Số lượng pin</th>
-                  <th className="p-2 border-b">Kết quả inverter</th>
-                  <th className="p-2 border-b">Tỷ số DC/AC</th>
-                  <th className="p-2 border-b">Dây inverter + MCCB</th>
-                  <th className="p-2 border-b">Dây tổng + MCCB</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Thời gian</TableHead>
+                  <TableHead>Tấm pin</TableHead>
+                  <TableHead className="text-center">Số lượng pin</TableHead>
+                  <TableHead>Kết quả inverter</TableHead>
+                  <TableHead className="text-center">Tỷ số DC/AC</TableHead>
+                  <TableHead>Dây inverter + MCCB</TableHead>
+                  <TableHead>Dây tổng + MCCB</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {history.map((item, i) => (
-                  <tr key={i}>
-                    <td className="p-2 border-b whitespace-nowrap">{item.time}</td>
-                    <td className="p-2 border-b">{item.panelName}</td>
-                    <td className="p-2 border-b text-center">{item.totalPanels}</td>
-                    <td className="p-2 border-b">{item.inverterResult}</td>
-                    <td className="p-2 border-b text-center">
+                  <TableRow key={i}>
+                    <TableCell className="whitespace-nowrap">{item.time}</TableCell>
+                    <TableCell>{item.panelName}</TableCell>
+                    <TableCell className="text-center">{item.totalPanels}</TableCell>
+                    <TableCell>{item.inverterResult}</TableCell>
+                    <TableCell className="text-center">
                       {item.dcAcRatio?.toFixed(2) ?? ""}
-                    </td>
-                    <td className="p-2 border-b">{item.inverterWireSummary || "-"}</td>
-                    <td className="p-2 border-b">{item.mainWireSummary || "-"}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell>{item.inverterWireSummary || "-"}</TableCell>
+                    <TableCell>{item.mainWireSummary || "-"}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </CardContent>
