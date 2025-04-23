@@ -60,8 +60,8 @@ const CalcHistory = ({ history, onExport }: CalcHistoryProps) => {
                     <td className="p-2 border-b text-center">
                       {item.dcAcRatio?.toFixed(2) ?? ""}
                     </td>
-                    <td className="p-2 border-b">{item.inverterWireSummary ?? ""}</td>
-                    <td className="p-2 border-b">{item.mainWireSummary ?? ""}</td>
+                    <td className="p-2 border-b">{item.inverterWireSummary || "-"}</td>
+                    <td className="p-2 border-b">{item.mainWireSummary || "-"}</td>
                   </tr>
                 ))}
               </tbody>

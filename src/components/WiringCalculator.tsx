@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { InverterCombination } from "@/utils/solarCalculations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -95,6 +96,21 @@ const WiringCalculator = ({ inverterCombination, onWireSave }: WiringCalculatorP
     }
 
     setHasHighCurrent(detectedHighCurrent);
+    
+    // Call onWireSave with the summary data for history
+    if (onWireSave && wiringResults.length > 0 && totalWiring) {
+      // Format inverter wire summary
+      const inverterWireSummary = wiringResults.map(item => 
+        `${item.inverter.name}: MCCB ${item.mccbRating}A, ${item.cable.type}${item.cable.count > 1 ? ` (${item.cable.count}x)` : ''}`
+      ).join('; ');
+      
+      // Format main wire summary
+      const mainWireSummary = totalWiring ? 
+        `MCCB ${totalWiring.mccbRating}A, ${totalWiring.cable.type}${totalWiring.cable.count > 1 ? ` (${totalWiring.cable.count}x)` : ''}` : '';
+      
+      onWireSave(inverterWireSummary, mainWireSummary);
+    }
+
     // eslint-disable-next-line
   }, [
     inverterCombination,

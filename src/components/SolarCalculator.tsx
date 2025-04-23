@@ -14,7 +14,6 @@ import {
   InverterCombination
 } from "@/utils/solarCalculations";
 import { Settings, Calculator, List, SlidersHorizontal, History as HistoryIcon } from "lucide-react";
-import { Save } from "lucide-react";
 
 const MENU_LIST = [
   { key: "input", label: "Nhập liệu", icon: Calculator },
@@ -96,6 +95,28 @@ const SolarCalculator = () => {
 
   const handleWiringSave = (inverterWireSummary: string, mainWireSummary: string) => {
     setLastWiring({ inverterWireSummary, mainWireSummary });
+    
+    if (selectedPanel && inverterCombination) {
+      const inverterSummary = inverterCombination.inverters
+        .map(
+          (inv) =>
+            `${inv.count}x ${inv.inverter.name} (${inv.inverter.power}kW)`
+        )
+        .join(" + ");
+      
+      setCalcHistory((prev) => [
+        {
+          time: new Date().toLocaleString("vi-VN"),
+          panelName: selectedPanel.name,
+          totalPanels,
+          inverterResult: inverterSummary,
+          dcAcRatio,
+          inverterWireSummary: inverterWireSummary,
+          mainWireSummary: mainWireSummary,
+        },
+        ...prev,
+      ]);
+    }
   };
 
   const isInputCompleted = !!selectedPanel && totalPanels > 0;
@@ -112,28 +133,6 @@ const SolarCalculator = () => {
       });
     }
     setActiveMenu(menuKey);
-  };
-
-  const handleSaveHistory = () => {
-    if (!selectedPanel || !inverterCombination) return;
-    const inverterSummary = inverterCombination.inverters
-      .map(
-        (inv) =>
-          `${inv.count}x ${inv.inverter.name} (${inv.inverter.power}kW)`
-      )
-      .join(" + ");
-    setCalcHistory((prev) => [
-      {
-        time: new Date().toLocaleString("vi-VN"),
-        panelName: selectedPanel.name,
-        totalPanels,
-        inverterResult: inverterSummary,
-        dcAcRatio,
-        inverterWireSummary: lastWiring.inverterWireSummary ?? "",
-        mainWireSummary: lastWiring.mainWireSummary ?? "",
-      },
-      ...prev,
-    ]);
   };
 
   return (
@@ -238,7 +237,7 @@ const SolarCalculator = () => {
               />
               {inverterCombination && (
                 <div className="mt-4 flex flex-wrap gap-2 justify-between items-center">
-                  <div className="flex gap-2">
+                  <div>
                     <button
                       className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
                       onClick={() => handleMenuClick("input")}
@@ -247,20 +246,13 @@ const SolarCalculator = () => {
                       Quay lại
                     </button>
                     <button
-                      className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
+                      className="px-4 py-2 ml-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
                       onClick={() => handleMenuClick("wiring")}
                       type="button"
                     >
                       Tính dây và MCCB
                     </button>
                   </div>
-                  <button
-                    className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
-                    onClick={handleSaveHistory}
-                    type="button"
-                  >
-                    <Save className="w-4 h-4" /> Lưu lại
-                  </button>
                 </div>
               )}
             </div>
@@ -279,13 +271,6 @@ const SolarCalculator = () => {
                   type="button"
                 >
                   Quay lại kết quả
-                </button>
-                <button
-                  className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
-                  onClick={handleSaveHistory}
-                  type="button"
-                >
-                  <Save className="w-4 h-4" /> Lưu lại
                 </button>
               </div>
             </div>
