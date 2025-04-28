@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { InverterCombination } from "@/utils/solarCalculations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +26,7 @@ const WiringCalculator = ({ inverterCombination, onWireSave }: WiringCalculatorP
   const [totalCoreType, setTotalCoreType] = useState<"single" | "multi">("multi");
   const [totalInsulationType, setTotalInsulationType] = useState<"PVC" | "XLPE">("XLPE");
   const [totalInstallationType, setTotalInstallationType] = useState<"underground" | "air">("air");
+  const [activeTab, setActiveTab] = useState<string>("settings");
 
   const [inverterWiring, setInverterWiring] = useState<any[]>([]);
   const [totalWiring, setTotalWiring] = useState<any | null>(null);
@@ -125,7 +127,7 @@ const WiringCalculator = ({ inverterCombination, onWireSave }: WiringCalculatorP
         <CardTitle className="text-xl font-semibold">Tính toán dây và MCCB</CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="settings" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full grid grid-cols-2 mb-4">
             <TabsTrigger 
               value="settings"
@@ -296,13 +298,7 @@ const WiringCalculator = ({ inverterCombination, onWireSave }: WiringCalculatorP
 
             <div className="flex justify-end mt-6">
               <Button
-                onClick={() => {
-                  const tabsList = document.querySelector('[role="tablist"]');
-                  const resultsTab = tabsList?.querySelector('[value="results"]') as HTMLButtonElement;
-                  if (resultsTab) {
-                    resultsTab.click();
-                  }
-                }}
+                onClick={() => setActiveTab("results")}
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 Xem kết quả <ArrowRight className="ml-2 h-4 w-4" />
