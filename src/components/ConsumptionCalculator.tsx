@@ -4,30 +4,40 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { calculateElectricityConsumption } from "@/utils/electricityCalculations";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const ConsumptionCalculator = () => {
   const [monthlyBill, setMonthlyBill] = useState<string>("");
+  const [hasVAT, setHasVAT] = useState<boolean>(false);
   const [result, setResult] = useState<{
-    monthlyConsumption: number;
+    totalKwh: number;
+    breakdownByLevel: { kwh: number; cost: number }[];
     requiredCapacity: number;
   } | null>(null);
 
+  const handleBillChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "");
+    if (value === "") {
+      setMonthlyBill("");
+      return;
+    }
+    const number = parseInt(value);
+    setMonthlyBill(number.toLocaleString("vi-VN"));
+  };
+
   const calculateCapacity = () => {
-    // Giả định giá điện trung bình là 3000 VND/kWh
-    const avgElectricityPrice = 3000;
-    // Tính toán số kWh tiêu thụ hàng tháng
-    const monthlyConsumption = Number(monthlyBill) / avgElectricityPrice;
+    const billValue = Number(monthlyBill.replace(/\./g, ""));
+    const { totalKwh, breakdownByLevel } = calculateElectricityConsumption(billValue, hasVAT);
     
     // Tính toán công suất hệ thống điện mặt trời cần thiết
-    // Giả định:
-    // - 1 kWp sản xuất trung bình 4 kWh/ngày (tùy theo vùng miền)
-    // - Hệ số hiệu suất 0.85
-    const dailyConsumption = monthlyConsumption / 30;
+    const dailyConsumption = totalKwh / 30;
     const requiredCapacity = dailyConsumption / (4 * 0.85);
 
     setResult({
-      monthlyConsumption: Math.round(monthlyConsumption * 100) / 100,
-      requiredCapacity: Math.round(requiredCapacity * 100) / 100,
+      totalKwh,
+      breakdownByLevel,
+      requiredCapacity: Math.round(requiredCapacity * 100) / 100
     });
   };
 
@@ -45,11 +55,19 @@ const ConsumptionCalculator = () => {
               <Label htmlFor="monthlyBill">Số tiền điện hàng tháng (VND)</Label>
               <Input
                 id="monthlyBill"
-                type="number"
                 value={monthlyBill}
-                onChange={(e) => setMonthlyBill(e.target.value)}
+                onChange={handleBillChange}
                 placeholder="Nhập số tiền điện hàng tháng"
               />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="hasVAT" 
+                checked={hasVAT}
+                onCheckedChange={(checked) => setHasVAT(checked as boolean)}
+              />
+              <Label htmlFor="hasVAT">Đã bao gồm VAT (10%)</Label>
             </div>
 
             <Button 
@@ -62,18 +80,27 @@ const ConsumptionCalculator = () => {
 
             {result && (
               <div className="mt-6 space-y-4 p-4 bg-blue-50 rounded-lg">
+                <div className="space-y-4">
+                  <p className="font-medium">Chi tiết tính toán theo bậc thang:</p>
+                  {result.breakdownByLevel.map((level, index) => (
+                    <div key={index} className="grid grid-cols-2 gap-2 text-sm">
+                      <div>Bậc {index + 1}: {level.kwh.toFixed(1)} kWh</div>
+                      <div className="text-right">{level.cost.toLocaleString("vi-VN")} VND</div>
+                    </div>
+                  ))}
+                </div>
                 <div>
-                  <p className="text-sm text-gray-600">Lượng điện tiêu thụ hàng tháng:</p>
-                  <p className="text-lg font-semibold">{result.monthlyConsumption} kWh</p>
+                  <p className="text-sm text-gray-600">Tổng lượng điện tiêu thụ:</p>
+                  <p className="text-lg font-semibold">{result.totalKwh.toLocaleString("vi-VN")} kWh</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Công suất hệ thống điện mặt trời cần lắp đặt:</p>
-                  <p className="text-lg font-semibold">{result.requiredCapacity} kWp</p>
+                  <p className="text-lg font-semibold">{result.requiredCapacity.toLocaleString("vi-VN")} kWp</p>
                 </div>
                 <div className="text-sm text-gray-500 mt-4">
                   <p>* Kết quả tính toán là ước tính dựa trên:</p>
                   <ul className="list-disc list-inside">
-                    <li>Giá điện trung bình: 3,000 VND/kWh</li>
+                    <li>Giá điện theo bậc thang EVN từ 11/10/2024</li>
                     <li>Sản lượng trung bình: 4 kWh/kWp/ngày</li>
                     <li>Hệ số hiệu suất: 85%</li>
                   </ul>
